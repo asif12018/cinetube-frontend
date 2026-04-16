@@ -35,3 +35,16 @@ export async function getMediaById(id:string){
         throw error;
     }
 }
+
+
+//get all the media by genre
+
+export async function getMediaAllGenre(){
+    try{
+        const res = await httpClient.get(`${BASE_API_URL}/genre`);
+        return res.data;
+    }catch(error:any){
+        console.log("Error fetching media genre", error);
+        throw error;
+    }
+}
