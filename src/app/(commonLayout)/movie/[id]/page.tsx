@@ -1,14 +1,16 @@
 "use client";
 
-import { useState, use } from "react";
+import { useState, use, useEffect } from "react";
 import { Navbar } from "@/components/ui/navbar";
-import { Play, Info, X, ShoppingCart, CreditCard, Loader2 } from "lucide-react"; // 🟢 Added Loader2 for loading state
+import { Play, Info, X, ShoppingCart, CreditCard, Loader2, Plus, Check } from "lucide-react"; 
 import { useQuery } from "@tanstack/react-query";
 import { getMediaById } from "@/service/media.service"; 
 import dynamic from "next/dynamic";
 import type ReactPlayerType from "react-player";
-// 🟢 Imported purchaseAMovie
 import { getPurchaseInfo, getSubscriptionInfo, purchaseAMovie } from "@/service/payment.service";
+// 🟢 Import both watchlist services!
+import { toggleWatchList, checkTheMovieOnWatchList } from "@/service/watchlist.service"; 
+import { toast } from "sonner"; 
 
 const ReactPlayer = dynamic(() => import("react-player"), { 
   ssr: false 
@@ -19,9 +21,10 @@ export default function MovieDetailsPage({ params }: { params: Promise<{ id: str
 
   const [playingUrl, setPlayingUrl] = useState<string | null>(null);
   const [isIntroPlaying, setIsIntroPlaying] = useState(false);
-  
-  // 🟢 NEW: State to prevent double-clicks while waiting for Stripe
   const [isRedirecting, setIsRedirecting] = useState(false);
+
+  const [isWatchlisted, setIsWatchlisted] = useState(false);
+  const [isWatchlistLoading, setIsWatchlistLoading] = useState(false);
 
   const handleLaunchVideo = (url: string) => {
     setPlayingUrl(url);
@@ -33,6 +36,7 @@ export default function MovieDetailsPage({ params }: { params: Promise<{ id: str
     setIsIntroPlaying(false);
   };
 
+  // 1️⃣ Fetch media details
   const { data: mediaResponse, isLoading, isError } = useQuery<any>({
     queryKey: ["media-details", id],
     queryFn: () => getMediaById(id),
@@ -40,16 +44,38 @@ export default function MovieDetailsPage({ params }: { params: Promise<{ id: str
 
   const movie = mediaResponse?.data || mediaResponse;
 
+  // 2️⃣ Fetch subscription info
   const {data: subscribtionResponse, isLoading: isSubscribtionLoading} = useQuery<any>({
     queryKey: ["subscription"],
     queryFn: () => getSubscriptionInfo(),
   });
 
+  // 3️⃣ Fetch purchase info
   const {data: isPurchase, isLoading: isPurchaseLoading} = useQuery<any>({
     queryKey: ["isPurchase", movie?.id],
     queryFn: () => getPurchaseInfo(movie?.id),
     enabled: !!movie?.id
   });
+
+  // 🟢 4️⃣ NEW: Fetch Watchlist Status
+  const { data: watchListCheckResponse, isLoading: isWatchListCheckLoading } = useQuery<any>({
+    queryKey: ["watchlist-check", id],
+    queryFn: () => checkTheMovieOnWatchList(id),
+    enabled: !!id, // Only run if we have the ID from the URL
+  });
+
+  // 🟢 NEW: Update the local state when the watchlist check finishes
+  useEffect(() => {
+    if (watchListCheckResponse !== undefined && watchListCheckResponse !== null) {
+      // Bulletproof check just in case it's nested (handles true, {success: true}, {data: true})
+      const isListed = 
+        watchListCheckResponse === true || 
+        watchListCheckResponse?.data === true || 
+        watchListCheckResponse?.success === true;
+        
+      setIsWatchlisted(isListed);
+    }
+  }, [watchListCheckResponse]);
 
   const isSubscribed = subscribtionResponse === true || subscribtionResponse?.data === true || subscribtionResponse?.success === true;
   const hasPurchased = isPurchase === true || isPurchase?.data === true || isPurchase?.success === true;
@@ -59,28 +85,59 @@ export default function MovieDetailsPage({ params }: { params: Promise<{ id: str
   const rentPrice = movie?.rentPrice ? `$${movie.rentPrice}` : "$3.00";
   const buyPrice = movie?.buyPrice ? `$${movie.buyPrice}` : "$15.00";
 
-  // 🟢 NEW: Fully wired up checkout handler
   const handleCheckout = async (type: "RENTAL" | "ONE_TIME_BUY" | "SUBSCRIPTION") => {
     try {
       setIsRedirecting(true);
-      
       const checkoutUrl = await purchaseAMovie(type, movie?.id);
-
       if (checkoutUrl) {
-        // Redirect the user to Stripe!
         window.location.href = checkoutUrl; 
       } else {
-        alert("Failed to create checkout session. Please try again.");
-        setIsRedirecting(false); // Only reset if it fails, otherwise let them redirect
+        toast.error("Failed to create checkout session. Please try again.");
+        setIsRedirecting(false);
       }
     } catch (error) {
       console.error("Checkout failed", error);
-      alert("Something went wrong.");
+      toast.error("Something went wrong during checkout.");
       setIsRedirecting(false);
     }
   };
 
-  if (isLoading || isSubscribtionLoading || isPurchaseLoading) {
+  const handleWatchlistToggle = async () => {
+    if (!id) return;
+    
+    try {
+      setIsWatchlistLoading(true);
+      const res = await toggleWatchList(id); 
+      
+      if (!res) {
+        toast.error("Action failed: Backend returned nothing.");
+        return;
+      }
+
+      const resString = JSON.stringify(res).toLowerCase();
+
+      if (resString.includes('"success":true') || resString.includes('"success": true')) {
+        if (resString.includes('added')) {
+          setIsWatchlisted(true);
+          toast.success("Added to Watchlist"); 
+        } else {
+          setIsWatchlisted(false);
+          toast.success("Removed from Watchlist"); 
+        }
+      } else {
+        toast.error("Failed to update watchlist"); 
+      }
+
+    } catch (error) {
+      console.error("Failed to toggle watchlist", error);
+      toast.error("An error occurred updating your watchlist"); 
+    } finally {
+      setIsWatchlistLoading(false);
+    }
+  };
+
+  // 🟢 Added `isWatchListCheckLoading` to the main loading screen 
+  if (isLoading || isSubscribtionLoading || isPurchaseLoading || isWatchListCheckLoading) {
     return (
       <div className="min-h-screen bg-[#141414] text-white flex items-center justify-center">
         <div className="w-12 h-12 border-4 border-gray-800 border-t-red-600 rounded-full animate-spin" />
@@ -175,6 +232,20 @@ export default function MovieDetailsPage({ params }: { params: Promise<{ id: str
                 </button>
               </>
             )}
+
+            <button 
+              onClick={handleWatchlistToggle}
+              disabled={isWatchlistLoading}
+              className="flex items-center justify-center w-12 h-12 md:w-14 md:h-14 bg-gray-500/40 text-white rounded-full hover:bg-gray-500/60 transition-colors backdrop-blur-sm border border-gray-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isWatchlistLoading ? (
+                <Loader2 className="w-6 h-6 animate-spin" />
+              ) : isWatchlisted ? (
+                <Check className="w-6 h-6 text-green-400" />
+              ) : (
+                <Plus className="w-6 h-6" />
+              )}
+            </button>
             
             {movie.trailerUrl && (
               <button 
