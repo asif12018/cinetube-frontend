@@ -55,7 +55,7 @@ export function Navbar() {
           href="/"
           className="text-2xl font-bold bg-gradient-to-r from-red-600 to-red-400 bg-clip-text text-transparent shrink-0"
         >
-          CineHub
+          CineTube
         </Link>
 
         {/* Search Section */}
