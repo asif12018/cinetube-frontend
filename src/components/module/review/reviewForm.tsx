@@ -82,9 +82,14 @@ export default function CreateReviewForm({ movieId }: { movieId: string }) {
         setContent("");
         setSelectedTags([]);
         setIsDropdownOpen(false);
+
+        
         
         // 🟢 Tell React Query to instantly refresh the reviews list!
         queryClient.invalidateQueries({ queryKey: ["movie-reviews", movieId] });
+
+        // 🟢 2. ADD THIS LINE: Tells the parent page to re-check if the user reviewed it!
+        queryClient.invalidateQueries({ queryKey: ["user-review-check", movieId] });
       } else {
         toast.error(res?.message || res?.data?.message || "Failed to post review.");
       }

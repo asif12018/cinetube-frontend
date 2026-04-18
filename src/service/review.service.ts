@@ -53,3 +53,31 @@ export async function createReview(payload: any, movieId: string) {
     return null;
   }
 }
+
+
+//
+
+export async function isUserHasAreview(movieId:string){
+    try{
+      const cookieStore = await cookies();
+      const accessToken = cookieStore.get("accessToken")?.value;
+      const sessionToken = cookieStore.get("better-auth.session_token")?.value;
+
+      if (!accessToken) return null;
+
+      const res = await httpClient.get(`${BASE_API_URL}/reviews/checkUserReview/${movieId}`,{
+        headers:{
+          Authorization: `Bearer ${accessToken}; better-auth.session_token=${sessionToken}`,
+        }
+      });
+      
+      // 🟢 FIXED: You forgot to return the response!
+      // This ensures we always return the data, or at least 'null', but NEVER 'undefined'
+      return res?.data ?? res ?? null;
+
+    }catch(error:any){
+      console.log("failed checking review", error);
+      // It's better to return null here instead of false so React Query stays consistent
+      return null; 
+    }
+}

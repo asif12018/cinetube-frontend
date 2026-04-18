@@ -8,15 +8,17 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner"; 
 
 import { Navbar } from "@/components/ui/navbar";
-import { Play, Info, X, ShoppingCart, CreditCard, Loader2, Plus, Check, Lock } from "lucide-react"; 
+// 🟢 FIXED: Added CheckCircle to the imports
+import { Play, Info, X, ShoppingCart, CreditCard, Loader2, Plus, Check, Lock, CheckCircle } from "lucide-react"; 
 
 import { getMediaById } from "@/service/media.service"; 
 import { getPurchaseInfo, getSubscriptionInfo, purchaseAMovie } from "@/service/payment.service";
 import { toggleWatchList, checkTheMovieOnWatchList } from "@/service/watchlist.service"; 
 
-
 import ReviewElement from "@/components/module/review/reviewElement";
 import CreateReviewForm from "@/components/module/review/reviewForm";
+import { getUserInfo } from "@/service/auth.service";
+import { isUserHasAreview } from "@/service/review.service";
 
 const ReactPlayer = dynamic(() => import("react-player"), { 
   ssr: false 
@@ -32,9 +34,8 @@ export default function MovieDetailsPage({ params }: { params: Promise<{ id: str
   const [isWatchlisted, setIsWatchlisted] = useState(false);
   const [isWatchlistLoading, setIsWatchlistLoading] = useState(false);
 
-  // 🟢 REPLACE THIS with your actual auth state (e.g., from a context or better-auth hook)
-  // For now, it's true so you can see the review form. Change to false to test the Lock Card!
-  const isUserLoggedIn = true; 
+  const [isUserCreatedReview, setIsUserCreatedReview] = useState(false);
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
 
   const handleLaunchVideo = (url: string) => {
     setPlayingUrl(url);
@@ -46,13 +47,48 @@ export default function MovieDetailsPage({ params }: { params: Promise<{ id: str
     setIsIntroPlaying(false);
   };
 
+  // Fetch User Info
+  const { data: userInfoResponse, isLoading: isUserInfoResponseLoading } = useQuery<any>({
+    queryKey: ["user-info"],
+    queryFn: () => getUserInfo(),
+  });
+
+  useEffect(() => {
+    if (userInfoResponse) {
+      setIsUserLoggedIn(true);
+    }
+  }, [userInfoResponse]);
+
   // 1️⃣ Fetch media details
   const { data: mediaResponse, isLoading, isError } = useQuery<any>({
     queryKey: ["media-details", id],
     queryFn: () => getMediaById(id),
   });
 
+  // 🟢 FIXED: Moved this UP so we can safely use movie.id in the next query
   const movie = mediaResponse?.data || mediaResponse;
+
+  // Fetch user review info
+  const { data: userReviewCheckResponse, isLoading: isUserReviweCheckResponseLoading } = useQuery<any>({
+    queryKey: ["user-review-check", movie?.id],
+    queryFn: () => isUserHasAreview(movie?.id),
+    // 🟢 FIXED: Only run this query if we actually have BOTH the user ID and the movie ID
+    enabled: !!userInfoResponse?.id && !!movie?.id
+  });
+
+  console.log('this user has review response', userReviewCheckResponse)
+
+ useEffect(() => {
+    // 🟢 FIXED: We added 'userReviewCheckResponse === true' 
+    // Now it will correctly catch the boolean and hide the form!
+    if (
+      userReviewCheckResponse === true || 
+      userReviewCheckResponse?.data === true || 
+      userReviewCheckResponse?.success === true
+    ) {
+      setIsUserCreatedReview(true);
+    }
+  }, [userReviewCheckResponse]);
 
   // 2️⃣ Fetch subscription info
   const { data: subscribtionResponse, isLoading: isSubscribtionLoading } = useQuery<any>({
@@ -284,7 +320,23 @@ export default function MovieDetailsPage({ params }: { params: Promise<{ id: str
       <div className="w-full max-w-4xl mx-auto px-4 md:px-12">
         {isUserLoggedIn ? (
           <>
-            <CreateReviewForm movieId={movie?.id || id} />
+            {/* 🟢 FIXED: Cleaned up logic and syntax! */}
+            {isUserCreatedReview ? (
+              <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-8 md:p-10 mb-8 flex flex-col items-center justify-center text-center transition-all hover:bg-white/10">
+                <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mb-4 border border-green-500/20 shadow-inner">
+                  <CheckCircle className="w-8 h-8 text-green-500" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">
+                  You've already reviewed this movie!
+                </h3>
+                <p className="text-gray-400 text-sm md:text-base max-w-md mx-auto">
+                  Thank you for sharing your thoughts. You can find your rating and comments in the audience reviews section below.
+                </p>
+              </div>
+            ) : (
+              <CreateReviewForm movieId={movie?.id || id} />
+            )}
+            
             <ReviewElement movieId={movie?.id || id} />
           </>
         ) : (
