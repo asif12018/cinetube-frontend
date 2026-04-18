@@ -1,5 +1,5 @@
 import ResetPasswordForm from '@/components/ui/shared/Auth/resetPasswordForm'
-import React from 'react'
+import React, { Suspense } from 'react'
 
 const ResetPasswordPage = () => {
   return (
@@ -12,7 +12,9 @@ const ResetPasswordPage = () => {
       <div className="absolute inset-0 bg-black/60 sm:bg-black/50"></div>
       
       <div className="relative z-10 w-full max-w-md">
-        <ResetPasswordForm/>
+        <Suspense fallback={<div className="text-white text-center font-semibold">Loading...</div>}>
+          <ResetPasswordForm/>
+        </Suspense>
       </div>
     </div>
   )

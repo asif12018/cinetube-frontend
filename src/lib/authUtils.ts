@@ -13,7 +13,11 @@ export type RouteConfig = {
 
 export const commonProtectedRoutes : RouteConfig = {
     exact : ["/my-profile", "/change-password", "/movie/:id"],
-    pattern : []
+    pattern: [
+        // 🟢 This regex matches any route that starts with /movie/ followed by an ID
+        // But it ignores the base /movie route!
+        /^\/movie\/[^\/]+(?:\/|$)/ 
+    ]
 }
 
 export const userProtectedRoutes: RouteConfig = {

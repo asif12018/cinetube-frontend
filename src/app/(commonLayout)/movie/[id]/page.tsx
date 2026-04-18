@@ -1,17 +1,22 @@
 "use client";
 
 import { useState, use, useEffect } from "react";
-import { Navbar } from "@/components/ui/navbar";
-import { Play, Info, X, ShoppingCart, CreditCard, Loader2, Plus, Check } from "lucide-react"; 
-import { useQuery } from "@tanstack/react-query";
-import { getMediaById } from "@/service/media.service"; 
+import Link from "next/link";
 import dynamic from "next/dynamic";
 import type ReactPlayerType from "react-player";
-import { getPurchaseInfo, getSubscriptionInfo, purchaseAMovie } from "@/service/payment.service";
-// 🟢 Import both watchlist services!
-import { toggleWatchList, checkTheMovieOnWatchList } from "@/service/watchlist.service"; 
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner"; 
+
+import { Navbar } from "@/components/ui/navbar";
+import { Play, Info, X, ShoppingCart, CreditCard, Loader2, Plus, Check, Lock } from "lucide-react"; 
+
+import { getMediaById } from "@/service/media.service"; 
+import { getPurchaseInfo, getSubscriptionInfo, purchaseAMovie } from "@/service/payment.service";
+import { toggleWatchList, checkTheMovieOnWatchList } from "@/service/watchlist.service"; 
+
+
 import ReviewElement from "@/components/module/review/reviewElement";
+import CreateReviewForm from "@/components/module/review/reviewForm";
 
 const ReactPlayer = dynamic(() => import("react-player"), { 
   ssr: false 
@@ -26,6 +31,10 @@ export default function MovieDetailsPage({ params }: { params: Promise<{ id: str
 
   const [isWatchlisted, setIsWatchlisted] = useState(false);
   const [isWatchlistLoading, setIsWatchlistLoading] = useState(false);
+
+  // 🟢 REPLACE THIS with your actual auth state (e.g., from a context or better-auth hook)
+  // For now, it's true so you can see the review form. Change to false to test the Lock Card!
+  const isUserLoggedIn = true; 
 
   const handleLaunchVideo = (url: string) => {
     setPlayingUrl(url);
@@ -46,29 +55,28 @@ export default function MovieDetailsPage({ params }: { params: Promise<{ id: str
   const movie = mediaResponse?.data || mediaResponse;
 
   // 2️⃣ Fetch subscription info
-  const {data: subscribtionResponse, isLoading: isSubscribtionLoading} = useQuery<any>({
+  const { data: subscribtionResponse, isLoading: isSubscribtionLoading } = useQuery<any>({
     queryKey: ["subscription"],
     queryFn: () => getSubscriptionInfo(),
   });
 
   // 3️⃣ Fetch purchase info
-  const {data: isPurchase, isLoading: isPurchaseLoading} = useQuery<any>({
+  const { data: isPurchase, isLoading: isPurchaseLoading } = useQuery<any>({
     queryKey: ["isPurchase", movie?.id],
     queryFn: () => getPurchaseInfo(movie?.id),
     enabled: !!movie?.id
   });
 
-  // 🟢 4️⃣ NEW: Fetch Watchlist Status
+  // 4️⃣ Fetch Watchlist Status
   const { data: watchListCheckResponse, isLoading: isWatchListCheckLoading } = useQuery<any>({
     queryKey: ["watchlist-check", id],
     queryFn: () => checkTheMovieOnWatchList(id),
-    enabled: !!id, // Only run if we have the ID from the URL
+    enabled: !!id,
   });
 
-  // 🟢 NEW: Update the local state when the watchlist check finishes
+  // Update local watchlist state when backend check completes
   useEffect(() => {
     if (watchListCheckResponse !== undefined && watchListCheckResponse !== null) {
-      // Bulletproof check just in case it's nested (handles true, {success: true}, {data: true})
       const isListed = 
         watchListCheckResponse === true || 
         watchListCheckResponse?.data === true || 
@@ -137,7 +145,7 @@ export default function MovieDetailsPage({ params }: { params: Promise<{ id: str
     }
   };
 
-  // 🟢 Added `isWatchListCheckLoading` to the main loading screen 
+  // Prevent UI flickering while fetching statuses
   if (isLoading || isSubscribtionLoading || isPurchaseLoading || isWatchListCheckLoading) {
     return (
       <div className="min-h-screen bg-[#141414] text-white flex items-center justify-center">
@@ -160,10 +168,10 @@ export default function MovieDetailsPage({ params }: { params: Promise<{ id: str
   const genreList = movie.genres?.map((g: any) => g.genre?.name).filter(Boolean).join(", ") || "Unknown";
 
   return (
-    <div className="min-h-screen bg-[#141414] text-white font-sans selection:bg-red-600 selection:text-white">
+    <div className="min-h-screen bg-[#141414] text-white font-sans selection:bg-red-600 selection:text-white pb-12">
       <Navbar />
 
-      <div className="relative w-full h-[85vh] md:h-[90vh] overflow-hidden">
+      <div className="relative w-full h-[85vh] md:h-[90vh] overflow-hidden mb-12">
         
         <div 
           className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat opacity-60" 
@@ -272,6 +280,42 @@ export default function MovieDetailsPage({ params }: { params: Promise<{ id: str
         </div>
       </div>
 
+      {/* 🟢 CONDITIONAL REVIEWS SECTION */}
+      <div className="w-full max-w-4xl mx-auto px-4 md:px-12">
+        {isUserLoggedIn ? (
+          <>
+            <CreateReviewForm movieId={movie?.id || id} />
+            <ReviewElement movieId={movie?.id || id} />
+          </>
+        ) : (
+          <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-8 md:p-12 text-center flex flex-col items-center justify-center transition-all hover:bg-white/10 mt-8 mb-24">
+            <div className="w-16 h-16 bg-black/40 rounded-full flex items-center justify-center mb-6 border border-gray-700">
+              <Lock className="w-8 h-8 text-gray-400" />
+            </div>
+            
+            <h3 className="text-2xl font-bold text-white mb-2">
+              Authentication Required
+            </h3>
+            
+            <p className="text-gray-400 max-w-md mx-auto mb-8 leading-relaxed">
+              To read reviews or share your own thoughts about this movie, please log in to your CineHub account.
+            </p>
+
+            <Link 
+              href="/login" 
+              className="bg-red-600 text-white px-8 py-3 rounded-md font-bold hover:bg-red-700 transition-colors shadow-lg shadow-red-900/20"
+            >
+              Log In
+            </Link>
+            
+            <p className="text-sm text-gray-500 mt-4">
+              Don't have an account? <Link href="/register" className="text-red-400 hover:text-red-300 hover:underline transition-colors">Sign up here</Link>
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* UNIVERSAL VIDEO MODAL */}
       {playingUrl && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 animate-in fade-in duration-300">
           <div className="relative w-full max-w-5xl aspect-video bg-black rounded-xl overflow-hidden shadow-2xl border border-gray-800">
@@ -299,10 +343,6 @@ export default function MovieDetailsPage({ params }: { params: Promise<{ id: str
           </div>
         </div>
       )}
-
-      <div>
-        <ReviewElement movieId={movie.id}/>
-      </div>
     </div>
   );
 }

@@ -30,13 +30,14 @@ function ReviewCard({ review }: { review: any }) {
             <p className="text-xs text-gray-500">{formattedDate}</p>
           </div>
         </div>
-        <div className="flex gap-1">
-          {[...Array(5)].map((_, i) => (
-            <Star 
-              key={i} 
-              className={`w-4 h-4 md:w-5 md:h-5 ${i < review.rating ? "fill-yellow-500 text-yellow-500" : "text-gray-600"}`} 
-            />
-          ))}
+        
+        {/* 🟢 FIXED: Premium 10-Point Rating Badge */}
+        <div className="flex items-center gap-1.5 bg-yellow-500/10 px-3 py-1.5 rounded-lg border border-yellow-500/20 shadow-inner">
+          <Star className="w-4 h-4 md:w-5 md:h-5 fill-yellow-500 text-yellow-500" />
+          <span className="text-yellow-500 font-bold text-sm md:text-base">
+            {review.rating}
+            <span className="text-yellow-500/60 font-medium text-xs md:text-sm">/10</span>
+          </span>
         </div>
       </div>
 
