@@ -124,8 +124,8 @@ export function Navbar() {
           
           {/* Role-based Links */}
           {user?.role === "USER" && (
-            <Link href="/media" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
-              Media
+            <Link href="/movie" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
+              Movie
             </Link>
           )}
           

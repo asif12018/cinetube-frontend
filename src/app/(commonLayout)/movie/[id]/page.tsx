@@ -11,6 +11,7 @@ import { getPurchaseInfo, getSubscriptionInfo, purchaseAMovie } from "@/service/
 // 🟢 Import both watchlist services!
 import { toggleWatchList, checkTheMovieOnWatchList } from "@/service/watchlist.service"; 
 import { toast } from "sonner"; 
+import ReviewElement from "@/components/module/review/reviewElement";
 
 const ReactPlayer = dynamic(() => import("react-player"), { 
   ssr: false 
@@ -298,6 +299,10 @@ export default function MovieDetailsPage({ params }: { params: Promise<{ id: str
           </div>
         </div>
       )}
+
+      <div>
+        <ReviewElement movieId={movie.id}/>
+      </div>
     </div>
   );
 }
