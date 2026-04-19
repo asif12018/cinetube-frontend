@@ -101,3 +101,30 @@ export async function isUserHasAreview(movieId:string){
       return null; 
     }
 }
+
+
+
+export async function updateReview(reviewId: string, content: string) {
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("accessToken")?.value;
+    const sessionToken = cookieStore.get("better-auth.session_token")?.value;
+
+    // 🟢 Hitting your existing PATCH route: router.patch("/:id", ...)
+    const res:any = await httpClient.patch(
+      `${BASE_API_URL}/reviews/${reviewId}`,
+      { content: content }, // Sending the updated text
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}; better-auth.session_token=${sessionToken}`,
+        },
+      }
+    );
+    
+    return res.data;
+  } catch (error: any) {
+    // Log the error from your backend AppError (e.g., "You can only edit pending reviews")
+    console.error("Error updating review:", error.response?.data?.message || error.message);
+    return { success: false, message: error.response?.data?.message };
+  }
+}
