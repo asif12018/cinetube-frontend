@@ -1,18 +1,23 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Film, Link as LinkIcon, DollarSign, Calendar, FileText, Upload, Search, X, Check, Image as ImageIcon } from 'lucide-react';
+import React, { useState, useEffect, use } from 'react';
+import { Film, Link as LinkIcon, DollarSign, Calendar, FileText, Upload, Search, X, Check, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { getAllActors } from '@/service/actor.service';
 import { getAllGenres } from '@/service/genre.service';
-import { createNewMedia } from '@/service/media.service';
-export default function AddMoviesPage() {
+import { getMediaById, updateMedia } from '@/service/media.service';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+
+export default function EditMoviePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
+  const router = useRouter();
+  
   const [isLoading, setIsLoading] = useState(false);
   const [actorSearch, setActorSearch] = useState("");
   const [isActorDropdownOpen, setIsActorDropdownOpen] = useState(false);
 
- // 🟢 Wrap them in arrow functions!
   const { data: actors = [] } = useQuery({ 
     queryKey: ['actors'], 
     queryFn: () => getAllActors() 
@@ -23,17 +28,46 @@ export default function AddMoviesPage() {
     queryFn: () => getAllGenres() 
   });
 
+  const { data: mediaResponse, isLoading: isMediaLoading } = useQuery<any>({
+    queryKey: ["media-details", id],
+    queryFn: () => getMediaById(id),
+  });
+
+  const movie = mediaResponse?.data || mediaResponse;
+
   const initialFormState = {
     title: "", synopsis: "", releaseYear: "", streamingUrl: "", trailerUrl: "",
-    pricingTier: "PREMIUM", status: "PUBLISHED", rentPrice: "5", buyPrice: "30",
+    pricingTier: "PREMIUM", status: "PUBLISHED", rentPrice: "", buyPrice: "",
     type: "MOVIE",
     actorIds: [] as string[], genreIds: [] as string[]
   };
 
   const [formData, setFormData] = useState(initialFormState);
-
   const [posterFile, setPosterFile] = useState<File | null>(null);
   const [backdropFile, setBackdropFile] = useState<File | null>(null);
+  const [existingPoster, setExistingPoster] = useState<string | null>(null);
+  const [existingBackdrop, setExistingBackdrop] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (movie) {
+      setFormData({
+        title: movie.title || "",
+        synopsis: movie.synopsis || "",
+        releaseYear: movie.releaseYear?.toString() || "",
+        streamingUrl: movie.streamingUrl || "",
+        trailerUrl: movie.trailerUrl || "",
+        pricingTier: movie.pricingTier || "PREMIUM",
+        status: movie.status || "PUBLISHED",
+        rentPrice: movie.rentPrice?.toString() || "",
+        buyPrice: movie.buyPrice?.toString() || "",
+        type: movie.type || "MOVIE",
+        actorIds: movie.cast?.map((c: any) => c.actorId || c.actor?.id).filter(Boolean) || [],
+        genreIds: movie.genres?.map((g: any) => g.genreId || g.genre?.id).filter(Boolean) || [],
+      });
+      setExistingPoster(movie.poster || movie.posterUrl || null);
+      setExistingBackdrop(movie.backdrop || movie.backdropUrl || null);
+    }
+  }, [movie]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -53,70 +87,51 @@ export default function AddMoviesPage() {
     }));
   };
 
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   if (!posterFile || !backdropFile) return toast.error("Upload both images!");
-  //   setIsLoading(true);
-  //   const toastId = toast.loading("Creating Media...");
-  //   try {
-  //     const submitData = new FormData();
-  //     Object.entries(formData).forEach(([key, value]) => {
-  //       if (Array.isArray(value)) {
-  //         value.forEach(item => submitData.append(key, item));
-  //       } else {
-  //         submitData.append(key, value as string);
-  //       }
-  //     });
-      
-  //     const slug = formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
-  //     submitData.append("slug", slug);
-      
-  //     submitData.append("poster", posterFile);
-  //     submitData.append("backdrop", backdropFile);
-  //     await createNewMedia(submitData);
-  //     toast.success("Published!", { id: toastId });
-  //   } catch (error: any) {
-  //     toast.error("Failed!", { id: toastId });
-  //   } finally { setIsLoading(false); }
-  // };
-
-  // Modern Input Styles
-  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!posterFile || !backdropFile) return toast.error("Upload both images!");
     setIsLoading(true);
-    const toastId = toast.loading("Creating Media...");
+    const toastId = toast.loading("Updating Media...");
     
     try {
       const submitData = new FormData();
       
       Object.entries(formData).forEach(([key, value]) => {
         if (Array.isArray(value)) {
-          value.forEach(item => submitData.append(key, item));
-        } else {
+          // If the array is empty, we still want to clear it on the backend
+          if (value.length === 0 && key === "genreIds") {
+             submitData.append(key, "[]");
+          } else if (value.length === 0 && key === "actorIds") {
+             submitData.append(key, "[]");
+          } else {
+             // For Node backend expecting arrays in FormData, we often send multiple same-key values
+             value.forEach(item => submitData.append(key, item));
+          }
+        } else if (value !== "" && value !== null && value !== undefined) {
           submitData.append(key, value as string);
         }
       });
       
-      const slug = formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
-      submitData.append("slug", slug);
+      if (posterFile) submitData.append("poster", posterFile);
+      if (backdropFile) submitData.append("backdrop", backdropFile);
       
-      submitData.append("poster", posterFile);
-      submitData.append("backdrop", backdropFile);
-      
-      await createNewMedia(submitData);
-      toast.success("Published!", { id: toastId });
-      
-      setFormData(initialFormState);
-      setPosterFile(null);
-      setBackdropFile(null);
-      setActorSearch("");
-      (e.target as HTMLFormElement).reset();
+      await updateMedia(id, submitData);
+      toast.success("Movie Updated Successfully!", { id: toastId });
+      router.push("/dashboard/manageMovies");
     } catch (error: any) {
-      toast.error("Failed!", { id: toastId });
-    } finally { setIsLoading(false); }
+      toast.error("Failed to update movie!", { id: toastId });
+    } finally { 
+      setIsLoading(false); 
+    }
   };
+
+  if (isMediaLoading) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+        <Loader2 className="w-12 h-12 text-red-600 animate-spin" />
+      </div>
+    );
+  }
+
   const inputBase = "w-full bg-[#1a1a1a] border border-gray-700 rounded-lg py-3 px-4 text-white focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-all placeholder:text-gray-500";
   const labelBase = "block text-sm font-semibold text-gray-300 mb-2 uppercase tracking-wider";
 
@@ -127,8 +142,8 @@ export default function AddMoviesPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-10 border-b border-gray-800 pb-6">
           <div>
-            <h1 className="text-4xl font-extrabold text-white tracking-tight">Create New Media</h1>
-            <p className="text-gray-400 mt-2">Add cinematic content to your global library.</p>
+            <h1 className="text-4xl font-extrabold text-white tracking-tight">Edit Media</h1>
+            <p className="text-gray-400 mt-2">Update movie or series details.</p>
           </div>
           <div className="bg-red-600/10 p-4 rounded-full">
              <Film className="w-8 h-8 text-red-600" />
@@ -232,18 +247,29 @@ export default function AddMoviesPage() {
           <div className="space-y-6">
             <div className="bg-[#141414] border border-gray-800 p-8 rounded-2xl shadow-xl space-y-6">
                <label className={labelBase}>Media Assets</label>
+               <p className="text-xs text-gray-400 -mt-1 mb-4">Leave empty to keep existing images.</p>
                
                <div className="space-y-4">
                  <div className="group relative border-2 border-dashed border-gray-800 hover:border-red-600/50 rounded-xl p-6 transition-all text-center">
-                    <ImageIcon className="w-8 h-8 text-gray-600 mx-auto mb-2 group-hover:text-red-500" />
-                    <p className="text-xs text-gray-500 mb-2 uppercase font-bold">Poster Image</p>
+                    {existingPoster && !posterFile && (
+                      <div className="mb-4 flex justify-center">
+                        <Image src={existingPoster} alt="Poster" width={80} height={120} className="rounded object-cover" />
+                      </div>
+                    )}
+                    <ImageIcon className={`w-8 h-8 text-gray-600 mx-auto mb-2 group-hover:text-red-500 ${existingPoster && !posterFile ? 'hidden' : ''}`} />
+                    <p className="text-xs text-gray-500 mb-2 uppercase font-bold">Replace Poster Image</p>
                     <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, 'poster')} />
                     {posterFile && <p className="text-xs text-green-500 font-bold truncate">{posterFile.name}</p>}
                  </div>
 
                  <div className="group relative border-2 border-dashed border-gray-800 hover:border-red-600/50 rounded-xl p-6 transition-all text-center">
-                    <ImageIcon className="w-8 h-8 text-gray-600 mx-auto mb-2 group-hover:text-red-500" />
-                    <p className="text-xs text-gray-500 mb-2 uppercase font-bold">Backdrop Image</p>
+                    {existingBackdrop && !backdropFile && (
+                      <div className="mb-4 flex justify-center">
+                        <Image src={existingBackdrop} alt="Backdrop" width={160} height={90} className="rounded object-cover" />
+                      </div>
+                    )}
+                    <ImageIcon className={`w-8 h-8 text-gray-600 mx-auto mb-2 group-hover:text-red-500 ${existingBackdrop && !backdropFile ? 'hidden' : ''}`} />
+                    <p className="text-xs text-gray-500 mb-2 uppercase font-bold">Replace Backdrop Image</p>
                     <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, 'backdrop')} />
                     {backdropFile && <p className="text-xs text-green-500 font-bold truncate">{backdropFile.name}</p>}
                  </div>
@@ -281,9 +307,14 @@ export default function AddMoviesPage() {
                 </div>
               </div>
 
-              <button disabled={isLoading} type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded-xl font-bold uppercase tracking-widest shadow-lg shadow-red-600/20 transition-all active:scale-95 disabled:opacity-50">
-                {isLoading ? "Publishing..." : "Create Movie"}
-              </button>
+              <div className="flex gap-3">
+                <button type="button" onClick={() => router.push("/dashboard/manageMovies")} className="flex-1 bg-gray-800 hover:bg-gray-700 text-white py-4 rounded-xl font-bold uppercase tracking-widest transition-all">
+                  Cancel
+                </button>
+                <button disabled={isLoading} type="submit" className="flex-[2] bg-red-600 hover:bg-red-700 text-white py-4 rounded-xl font-bold uppercase tracking-widest shadow-lg shadow-red-600/20 transition-all active:scale-95 disabled:opacity-50">
+                  {isLoading ? "Saving..." : "Update"}
+                </button>
+              </div>
             </div>
           </div>
         </form>

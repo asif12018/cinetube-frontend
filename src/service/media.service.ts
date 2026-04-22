@@ -7,7 +7,7 @@ const BASE_API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export async function getMedia(queryString?: string) {
   try {
-    const res = await httpClient.get(`${BASE_API_URL}/media?${queryString}`);
+    const res:any = await httpClient.get(`${BASE_API_URL}/media?${queryString}`);
     return res.data;
   } catch (error: any) {
     console.log("Error fetching media:", error);
@@ -60,3 +60,40 @@ export async function createNewMedia (mediaData: FormData) {
     throw error;
   }
 };
+
+export async function updateMedia(id: string, mediaData: FormData) {
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("accessToken")?.value;
+    const sessionToken = cookieStore.get("better-auth.session_token")?.value;
+    const response = await httpClient.patch(`${BASE_API_URL}/media/update-media/${id}`, mediaData, {
+      headers: {
+        Authorization: `Bearer ${accessToken}; better-auth.session_token=${sessionToken}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return response.data;
+  } catch (error: any) {
+    console.error("Error updating media:", error);
+    throw error;
+  }
+}
+
+export async function deleteMedia(id: string) {
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("accessToken")?.value;
+    const sessionToken = cookieStore.get("better-auth.session_token")?.value;
+    const response = await httpClient.delete(`${BASE_API_URL}/media/delete-media/${id}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}; better-auth.session_token=${sessionToken}`,
+      },
+    });
+
+    return response.data;
+  } catch (error: any) {
+    console.error("Error deleting media:", error);
+    throw error;
+  }
+}

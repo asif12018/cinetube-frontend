@@ -348,7 +348,7 @@ export default function MovieDetailsPage({ params }: { params: Promise<{ id: str
               <CreateReviewForm movieId={movie?.id || id} />
             )}
             
-            <ReviewElement movieId={movie?.id || id} />
+            <ReviewElement movieId={movie?.id || id} isAdmin={isAdmin} />
           </>
         ) : (
           <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-8 md:p-12 text-center flex flex-col items-center justify-center transition-all hover:bg-white/10 mt-8 mb-24">

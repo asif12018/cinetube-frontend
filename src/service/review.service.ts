@@ -128,3 +128,64 @@ export async function updateReview(reviewId: string, content: string) {
     return { success: false, message: error.response?.data?.message };
   }
 }
+
+export async function getUnPublishedReviews() {
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("accessToken")?.value;
+    const sessionToken = cookieStore.get("better-auth.session_token")?.value;
+
+    const res:any = await httpClient.get(`${BASE_API_URL}/reviews`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}; better-auth.session_token=${sessionToken}`,
+      },
+    });
+
+    return res.data;
+  } catch (error: any) {
+    console.error("Error fetching unpublished reviews:", error);
+    return null;
+  }
+}
+
+export async function updateReviewStatus(reviewId: string, status: string) {
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("accessToken")?.value;
+    const sessionToken = cookieStore.get("better-auth.session_token")?.value;
+
+    const res: any = await httpClient.patch(
+      `${BASE_API_URL}/reviews/status/${reviewId}`,
+      { status },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}; better-auth.session_token=${sessionToken}`,
+        },
+      }
+    );
+
+    return res.data;
+  } catch (error: any) {
+    console.error("Error updating review status:", error.response?.data?.message || error.message);
+    return { success: false, message: error.response?.data?.message };
+  }
+}
+
+export async function deleteReview(reviewId: string) {
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("accessToken")?.value;
+    const sessionToken = cookieStore.get("better-auth.session_token")?.value;
+
+    const res: any = await httpClient.delete(`${BASE_API_URL}/reviews/${reviewId}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}; better-auth.session_token=${sessionToken}`,
+      },
+    });
+
+    return res.data;
+  } catch (error: any) {
+    console.error("Error deleting review:", error.response?.data?.message || error.message);
+    return { success: false, message: error.response?.data?.message };
+  }
+}

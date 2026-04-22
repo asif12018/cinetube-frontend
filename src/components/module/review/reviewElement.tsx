@@ -5,12 +5,18 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Star, ThumbsUp, MessageSquare, UserCircle, Loader2, Edit2, X, Check } from "lucide-react"; 
 import { toast } from "sonner"; 
 
-import { getMovieReviewByMovieId, updateReview } from "@/service/review.service"; 
+import { getMovieReviewByMovieId, updateReview, updateReviewStatus, deleteReview } from "@/service/review.service"; 
 import { toggoleLike } from "@/service/like.service"; 
 import { createComment } from "@/service/comment.service"; 
+import { ConfirmationModal } from "@/components/ui/shared/ConfirmationModal";
 
-function ReviewCard({ review }: { review: any }) {
+function ReviewCard({ review, isAdmin }: { review: any; isAdmin?: boolean }) {
   const [showComments, setShowComments] = useState(false);
+  const [modalState, setModalState] = useState<{
+    isOpen: boolean;
+    action: "STATUS" | "DELETE" | null;
+    nextStatus: string | null;
+  }>({ isOpen: false, action: null, nextStatus: null });
   
   // Like States
   const [isLiked, setIsLiked] = useState(review.isLikedByCurrentUser || false);
@@ -102,6 +108,39 @@ function ReviewCard({ review }: { review: any }) {
     submitEdit();
   };
 
+  // ADMIN MUTATIONS
+  const statusMutation = useMutation({
+    mutationFn: (status: string) => updateReviewStatus(review.id, status),
+    onSuccess: (data) => {
+      if (data?.success === false) {
+        toast.error(data.message || "Failed to update review status");
+      } else {
+        toast.success("Review status updated successfully");
+        queryClient.invalidateQueries({ queryKey: ["movie-reviews"] });
+        setModalState({ isOpen: false, action: null, nextStatus: null });
+      }
+    },
+    onError: () => {
+      toast.error("Failed to update review status");
+    }
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteReview(review.id),
+    onSuccess: (data) => {
+      if (data?.success === false) {
+        toast.error(data.message || "Failed to delete review");
+      } else {
+        toast.success("Review deleted successfully");
+        queryClient.invalidateQueries({ queryKey: ["movie-reviews"] });
+        setModalState({ isOpen: false, action: null, nextStatus: null });
+      }
+    },
+    onError: () => {
+      toast.error("Failed to delete review");
+    }
+  });
+
   const getContainerStyles = () => {
     if (review.status === "UNPUBLISHED") {
       return "border-red-500/30 bg-red-500/5 hover:bg-red-500/10";
@@ -138,9 +177,38 @@ function ReviewCard({ review }: { review: any }) {
           </div>
         </div>
         
-        {/* Rating Badge & Edit Button Container */}
+        {/* Rating Badge & Action Container */}
         <div className="flex items-center gap-3">
           
+          {/* ADMIN ACTIONS */}
+          {isAdmin && (
+            <div className="flex items-center gap-2 mr-2">
+              <button
+                onClick={() => {
+                  const nextStatus = review.status === "PUBLISHED" ? "UNPUBLISHED" : "PUBLISHED";
+                  setModalState({ isOpen: true, action: "STATUS", nextStatus });
+                }}
+                disabled={statusMutation.isPending}
+                className={`text-xs px-2 py-1 rounded border transition-colors ${
+                  review.status === "PUBLISHED" 
+                    ? "bg-yellow-500/10 text-yellow-500 border-yellow-500/20 hover:bg-yellow-500/20"
+                    : "bg-green-500/10 text-green-500 border-green-500/20 hover:bg-green-500/20"
+                }`}
+              >
+                {statusMutation.isPending ? "..." : review.status === "PUBLISHED" ? "Unpublish" : "Approve"}
+              </button>
+              <button
+                onClick={() => {
+                  setModalState({ isOpen: true, action: "DELETE", nextStatus: null });
+                }}
+                disabled={deleteMutation.isPending}
+                className="text-xs px-2 py-1 rounded bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 transition-colors"
+              >
+                {deleteMutation.isPending ? "..." : "Delete"}
+              </button>
+            </div>
+          )}
+
           {/* EDIT BUTTON */}
           {review.isOwner && review.status !== "PUBLISHED" && !isEditing && (
             <button 
@@ -304,12 +372,55 @@ function ReviewCard({ review }: { review: any }) {
 
         </div>
       )}
+
+      {/* ADMIN ACTION CONFIRMATION MODAL */}
+      <ConfirmationModal
+        isOpen={modalState.isOpen}
+        onClose={() => setModalState({ isOpen: false, action: null, nextStatus: null })}
+        onConfirm={() => {
+          if (modalState.action === "STATUS" && modalState.nextStatus) {
+            statusMutation.mutate(modalState.nextStatus);
+          } else if (modalState.action === "DELETE") {
+            deleteMutation.mutate();
+          }
+        }}
+        isPending={statusMutation.isPending || deleteMutation.isPending}
+        title={
+          modalState.action === "DELETE" 
+            ? "Delete Review?" 
+            : modalState.nextStatus === "PUBLISHED" 
+              ? "Approve Review?" 
+              : "Unpublish Review?"
+        }
+        message={
+          modalState.action === "DELETE"
+            ? "Are you sure you want to permanently delete this review? This action cannot be undone."
+            : modalState.nextStatus === "PUBLISHED"
+              ? "Are you sure you want to approve and publish this review? It will be visible to all users."
+              : "Are you sure you want to unpublish this review? It will be hidden from public view."
+        }
+        confirmText={
+          modalState.action === "DELETE" 
+            ? "Yes, Delete" 
+            : modalState.nextStatus === "PUBLISHED" 
+              ? "Yes, Approve" 
+              : "Yes, Unpublish"
+        }
+        cancelText="Cancel"
+        variant={
+          modalState.action === "DELETE" 
+            ? "danger" 
+            : modalState.nextStatus === "PUBLISHED" 
+              ? "success" 
+              : "warning"
+        }
+      />
     </div>
   );
 }
 
 // Main Component exported to your page
-export default function ReviewElement({ movieId }: { movieId: string }) {
+export default function ReviewElement({ movieId, isAdmin }: { movieId: string; isAdmin?: boolean }) {
   const { data: response, isLoading, isError } = useQuery<any>({
     queryKey: ["movie-reviews", movieId],
     queryFn: () => getMovieReviewByMovieId(movieId),
@@ -343,7 +454,7 @@ export default function ReviewElement({ movieId }: { movieId: string }) {
       ) : (
         <div className="flex flex-col gap-6">
           {reviews.map((review: any) => (
-            <ReviewCard key={review.id} review={review} />
+            <ReviewCard key={review.id} review={review} isAdmin={isAdmin} />
           ))}
         </div>
       )}

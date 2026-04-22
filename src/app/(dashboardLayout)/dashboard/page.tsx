@@ -26,7 +26,7 @@ export default async function DashboardOverViewPage() {
 
   return (
     // 🟢 FORCING THE DARK THEME AND FONT HERE TO FIX THE LEAK
-    <div className="bg-[#0a0a0a] min-h-screen w-full text-white font-sans rounded-xl -m-4 p-4 md:-m-8 md:p-8">
+    <div className="bg-[#0a0a0a] min-h-screen w-full text-white font-sans p-4 md:p-8">
       
       {/* HEADER SECTION */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">

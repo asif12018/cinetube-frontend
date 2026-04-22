@@ -18,6 +18,7 @@ export function AdminSidebar({ closeMobile }: { closeMobile?: () => void }) {
   const navLinks = [
     { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
     { name: "Add Movie/Series", href: "/dashboard/addMovies", icon: Film },
+    { name: "Manage Movies", href: "/dashboard/manageMovies", icon: Film },
     { name: "Manage Actors", href: "/dashboard/addActor", icon: Users },
     { name: "Pending Reviews", href: "/dashboard/reviews", icon: MessageSquareWarning }, 
   ];
