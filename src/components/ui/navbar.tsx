@@ -23,7 +23,6 @@ import { toast } from "sonner";
 
 import { getUserInfo, logoutUserAction } from "@/service/auth.service";
 import { getMedia } from "@/service/media.service";
-import { getSubscriptionInfo } from "@/service/payment.service";
 import {
   getAllUserNotification,
   readNotification,
@@ -45,10 +44,13 @@ export function Navbar() {
     queryFn: getUserInfo,
   });
 
-  // 2. Fetch Subscription Info
+  // 2. Fetch Subscription Info via API proxy (avoids "use server" / cookies() restriction in client components)
   const { data: subResponse, isLoading: isLoadingSub } = useQuery({
     queryKey: ["subscription", user?.id],
-    queryFn: getSubscriptionInfo,
+    queryFn: () =>
+      fetch("/api/subscription", { credentials: "include" }).then((r) =>
+        r.ok ? r.json() : null
+      ),
     enabled: !!user,
   });
 
