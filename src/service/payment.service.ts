@@ -49,31 +49,13 @@ export async function getPurchaseInfo(mediaId: string) {
 
 export async function getSubscriptionInfo() {
   try {
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get("accessToken")?.value;
-    const sessionToken = cookieStore.get("better-auth.session_token")?.value;
-
-    if (!accessToken) {
-      return null;
-    }
-
-    // 🟢 Attach the token to the Authorization header
-    const res: any = await httpClient.get(
-      `${BASE_API_URL}/payment/getSubscription`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}; better-auth.session_token=${sessionToken}`,
-        },
-      },
-    );
-
-    return res.data;
+    // 🟢 Fix: The payment-history endpoint is proven to work correctly.
+    // We fetch it and extract just the subscription part to keep compatibility
+    // with components that use getSubscriptionInfo.
+    const res = await getUserPaymentHistory();
+    return res?.data?.subscription || null;
   } catch (error: any) {
-    // Better error logging to see exactly what the backend rejected
-    console.error(
-      "Fetch Purchase Error:",
-      error.response?.data || error.message,
-    );
+    console.error("Fetch Subscription Error:", error);
     return null;
   }
 }
