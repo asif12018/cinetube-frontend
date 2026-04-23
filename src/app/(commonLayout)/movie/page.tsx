@@ -59,7 +59,13 @@ export default function MediaPage() {
     queryFn: () => getMediaAllGenre(),
   });
 
-  const genresList = genresResponse?.data?.data || genresResponse?.data || [];
+  const genresList: any[] = Array.isArray(genresResponse)
+    ? genresResponse
+    : Array.isArray(genresResponse?.data?.data)
+    ? genresResponse.data.data
+    : Array.isArray(genresResponse?.data)
+    ? genresResponse.data
+    : [];
 
   // Reusable sleek styling for dropdowns
   const selectStyle = "appearance-none bg-[#141414] border border-gray-700/50 hover:border-gray-500 rounded-full py-2.5 px-5 text-sm outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-all cursor-pointer shadow-lg";

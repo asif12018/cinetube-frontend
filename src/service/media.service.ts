@@ -25,12 +25,12 @@ export async function getMediaById(id: string) {
   }
 }
 
-//get all the media by genre
-
+//get all the media by genre (plain fetch — no auth needed, safe to call from client)
 export async function getMediaAllGenre() {
   try {
-    const res = await httpClient.get(`${BASE_API_URL}/genre`);
-    return res.data;
+    const res = await fetch(`${BASE_API_URL}/genre`, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch genres");
+    return res.json();
   } catch (error: any) {
     console.log("Error fetching media genre", error);
     throw error;
