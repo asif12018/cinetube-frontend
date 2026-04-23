@@ -136,8 +136,11 @@ export default function MovieDetailsPage({ params }: { params: Promise<{ id: str
     userInfoResponse?.data?.role === "ADMIN" || 
     userInfoResponse?.data?.data?.role === "ADMIN";
 
-  // 🟢 NEW: Add isAdmin to the final access logic
-  const hasAccess = isSubscribed || hasPurchased || isAdmin;
+  // FREE movies are always accessible — no subscription, purchase, or login required
+  const isFree = movie?.pricingTier === "FREE";
+
+  // 🟢 NEW: Add isAdmin + isFree to the final access logic
+  const hasAccess = isFree || isSubscribed || hasPurchased || isAdmin;
 
   const rentPrice = movie?.rentPrice ? `$${movie.rentPrice}` : "$3.00";
   const buyPrice = movie?.buyPrice ? `$${movie.buyPrice}` : "$15.00";
