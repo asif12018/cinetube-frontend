@@ -7,6 +7,7 @@ import { Hero } from "@/components/ui/hero";
 import { MovieRow } from "@/components/ui/movie-row";
 import { MovieCard } from "@/components/ui/movie-card"; 
 import { SplashIntro } from "@/components/ui/splash-intro"; 
+import { Pricing } from "@/components/ui/pricing"; 
 import { getMedia } from "@/service/media.service";
 import { useQuery } from "@tanstack/react-query";
 import { Search as SearchIcon } from "lucide-react";
@@ -79,22 +80,28 @@ function HomeContent() {
           /* DEFAULT CATEGORY ROWS (Clean Spacing, No Overlap) */
           <div className="flex flex-col gap-8 md:gap-12 mt-8 md:mt-12 animate-in fade-in duration-700">
             
-            <MovieRow title="Trending Now" movies={moviesList.slice(0, 10)} />
+            <MovieRow 
+              title="Trending Now" 
+              movies={[...moviesList].sort((a: any, b: any) => (b.views || b.likes || 0) - (a.views || a.likes || 0)).slice(0, 5)} 
+            />
             
             <MovieRow 
               title="Top Rated This Week" 
-              movies={[...moviesList].sort((a: any, b: any) => (b.avgRating || 0) - (a.avgRating || 0))} 
+              movies={[...moviesList].filter(m => m.avgRating > 0).sort((a: any, b: any) => (b.avgRating || 0) - (a.avgRating || 0)).slice(0, 5)} 
             />
 
             <MovieRow 
               title="Newly Added" 
-              movies={[...moviesList].sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())} 
+              movies={[...moviesList].sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5)} 
             />
             
             <MovieRow 
               title="Editor’s Picks" 
-              movies={moviesList.filter((m: any) => m.isEditorPick === true)} 
+              movies={moviesList.filter((m: any) => m.isEditorPick === true).slice(0, 5)} 
             />
+            
+            {/* PRICING SECTION */}
+            <Pricing />
             
           </div>
 

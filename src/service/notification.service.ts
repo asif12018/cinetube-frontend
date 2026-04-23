@@ -7,10 +7,11 @@ import { revalidatePath } from "next/cache";
 const BASE_API_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export async function getAllUserNotification() {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("accessToken")?.value;
+  const sessionToken = cookieStore.get("better-auth.session_token")?.value;
+
   try {
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get("accessToken")?.value;
-    const sessionToken = cookieStore.get("better-auth.session_token")?.value;
 
     if (!accessToken) {
       return null;
@@ -36,10 +37,11 @@ export async function getAllUserNotification() {
 }
 
 export async function readNotification() {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("accessToken")?.value;
+  const sessionToken = cookieStore.get("better-auth.session_token")?.value;
+
   try {
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get("accessToken")?.value;
-    const sessionToken = cookieStore.get("better-auth.session_token")?.value;
 
     if (!accessToken) {
       return null;

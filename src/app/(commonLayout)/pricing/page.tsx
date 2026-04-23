@@ -218,9 +218,9 @@ export default function PricingPage() {
                   <Sparkles className="w-3.5 h-3.5" /> Most Popular
                 </div>
                 
-                <h3 className="text-xl font-medium text-red-500 mb-2">CineHub Pro</h3>
+                <h3 className="text-xl font-medium text-red-500 mb-2">Premium Monthly Subscription</h3>
                 <div className="flex items-baseline gap-1 mb-2">
-                  <span className="text-4xl font-bold text-white">$9.99</span>
+                  <span className="text-4xl font-bold text-white">$75.00</span>
                   <span className="text-gray-400 font-medium">/month</span>
                 </div>
                 <p className="text-sm text-gray-400 mb-6 border-b border-gray-800 pb-6">Cancel anytime. No hidden fees.</p>

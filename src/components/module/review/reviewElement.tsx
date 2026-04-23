@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Star, ThumbsUp, MessageSquare, UserCircle, Loader2, Edit2, X, Check } from "lucide-react"; 
+import { Star, ThumbsUp, MessageSquare, UserCircle, Loader2, Edit2, X, Check, AlertTriangle } from "lucide-react"; 
 import { toast } from "sonner"; 
 
 import { getMovieReviewByMovieId, updateReview, updateReviewStatus, deleteReview } from "@/service/review.service"; 
@@ -30,6 +30,9 @@ function ReviewCard({ review, isAdmin }: { review: any; isAdmin?: boolean }) {
   // Edit States
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(review.content);
+  
+  // Spoiler States
+  const [revealSpoiler, setRevealSpoiler] = useState(false);
   
   const queryClient = useQueryClient();
 
@@ -265,9 +268,21 @@ function ReviewCard({ review, isAdmin }: { review: any; isAdmin?: boolean }) {
         ) : (
           // NORMAL VIEW MODE
           <>
-            <p className="text-gray-300 leading-relaxed text-sm md:text-base">
-              {review.content}
-            </p>
+            {review.isSpoiler && !revealSpoiler ? (
+              <div 
+                className="bg-black/30 border border-red-500/20 p-4 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-black/40 transition-colors"
+                onClick={() => setRevealSpoiler(true)}
+              >
+                <div className="text-red-500 font-bold mb-2 flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5" /> Spoiler Warning
+                </div>
+                <p className="text-gray-400 text-sm">This review contains spoilers. Click to reveal.</p>
+              </div>
+            ) : (
+              <p className="text-gray-300 leading-relaxed text-sm md:text-base">
+                {review.content}
+              </p>
+            )}
             {review.tags && review.tags.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-4">
                 {review.tags.map((t: any) => (

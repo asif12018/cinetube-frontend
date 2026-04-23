@@ -38,7 +38,7 @@ export default function EditMoviePage({ params }: { params: Promise<{ id: string
   const initialFormState = {
     title: "", synopsis: "", releaseYear: "", streamingUrl: "", trailerUrl: "",
     pricingTier: "PREMIUM", status: "PUBLISHED", rentPrice: "", buyPrice: "",
-    type: "MOVIE",
+    type: "MOVIE", director: "",
     actorIds: [] as string[], genreIds: [] as string[]
   };
 
@@ -61,6 +61,7 @@ export default function EditMoviePage({ params }: { params: Promise<{ id: string
         rentPrice: movie.rentPrice?.toString() || "",
         buyPrice: movie.buyPrice?.toString() || "",
         type: movie.type || "MOVIE",
+        director: movie.director || "",
         actorIds: movie.cast?.map((c: any) => c.actorId || c.actor?.id).filter(Boolean) || [],
         genreIds: movie.genres?.map((g: any) => g.genreId || g.genre?.id).filter(Boolean) || [],
       });
@@ -165,6 +166,11 @@ export default function EditMoviePage({ params }: { params: Promise<{ id: string
                   <label className={labelBase}>Release Year</label>
                   <input required name="releaseYear" value={formData.releaseYear} type="number" placeholder="2026" className={inputBase} onChange={handleChange} />
                 </div>
+              </div>
+
+              <div>
+                <label className={labelBase}>Director</label>
+                <input required name="director" value={formData.director} placeholder="Christopher Nolan" className={inputBase} onChange={handleChange} />
               </div>
 
               <div>
