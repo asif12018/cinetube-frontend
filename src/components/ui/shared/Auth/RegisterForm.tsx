@@ -263,11 +263,8 @@ const RegisterForm = ({ redirectPath }: RegisterFormProps) => {
           </form.Field>
 
           {serverError && (
-            <Alert
-              variant={"destructive"}
-              className="bg-[#e87c03] border-none text-white font-medium p-4 mt-4"
-            >
-              <AlertDescription className="text-white">{serverError}</AlertDescription>
+            <Alert className="bg-[#e87c03] border-none text-white font-medium p-4 mt-4">
+              <AlertDescription className="text-white font-semibold">{serverError}</AlertDescription>
             </Alert>
           )}
 
