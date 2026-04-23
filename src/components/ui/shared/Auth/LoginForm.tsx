@@ -134,13 +134,13 @@ const LoginForm = ({ redirectPath }: LoginFormProps) => {
 
           {serverError && (
             <Alert variant={"destructive"} className="bg-[#e87c03] border-none text-white font-medium p-4 mt-4">
-              <AlertDescription>{serverError}</AlertDescription>
+              <AlertDescription className="text-white">{serverError}</AlertDescription>
             </Alert>
           )}
 
           {successMessage && (
-            <Alert className="bg-[#2b9049] border-none text-white font-medium p-4 mt-4">
-              <AlertDescription>{successMessage}</AlertDescription>
+            <Alert className="bg-[#1a8a3c] border border-green-400/40 text-white font-medium p-4 mt-4">
+              <AlertDescription className="text-white font-semibold">{successMessage}</AlertDescription>
             </Alert>
           )}
 

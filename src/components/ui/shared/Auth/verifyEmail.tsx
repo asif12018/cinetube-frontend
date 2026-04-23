@@ -147,9 +147,15 @@ export default function OtpVerifyForm({ email }: OtpVerifyFormProps) {
 
       {/* Status message */}
       {message && (
-        <p className={`text-sm text-center ${message.ok ? "text-green-600" : "text-red-500"}`}>
+        <div
+          className={`w-full rounded-md px-4 py-3 text-sm text-center font-semibold ${
+            message.ok
+              ? "bg-[#1a8a3c] border border-green-400/40 text-white"
+              : "bg-[#e87c03] border border-orange-400/40 text-white"
+          }`}
+        >
           {message.text}
-        </p>
+        </div>
       )}
     </div>
   );
