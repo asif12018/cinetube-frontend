@@ -48,6 +48,7 @@ export default function AddMoviesPage() {
     director: "",
     actorIds: [] as string[],
     genreIds: [] as string[],
+    streamingPlatFrom: "OTHER",
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -261,6 +262,25 @@ export default function AddMoviesPage() {
                     />
                   </div>
                 </div>
+              </div>
+
+              <div>
+                <label className={labelBase}>Streaming Platform</label>
+                <select
+                  name="streamingPlatFrom"
+                  className={inputBase}
+                  onChange={handleChange}
+                  value={formData.streamingPlatFrom}
+                >
+                  <option value="NETFLIX">Netflix</option>
+                  <option value="AMAZON_PRIME">Amazon Prime</option>
+                  <option value="DISNEY_PLUS">Disney+</option>
+                  <option value="HBO_MAX">HBO Max</option>
+                  <option value="HULU">Hulu</option>
+                  <option value="APPLE_TV">Apple TV</option>
+                  <option value="YOUTUBE">YouTube</option>
+                  <option value="OTHER">Other</option>
+                </select>
               </div>
             </div>
 

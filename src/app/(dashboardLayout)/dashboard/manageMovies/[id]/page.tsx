@@ -39,7 +39,8 @@ export default function EditMoviePage({ params }: { params: Promise<{ id: string
     title: "", synopsis: "", releaseYear: "", streamingUrl: "", trailerUrl: "",
     pricingTier: "PREMIUM", status: "PUBLISHED", rentPrice: "", buyPrice: "",
     type: "MOVIE", director: "",
-    actorIds: [] as string[], genreIds: [] as string[]
+    actorIds: [] as string[], genreIds: [] as string[],
+    streamingPlatFrom: "OTHER"
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -64,6 +65,7 @@ export default function EditMoviePage({ params }: { params: Promise<{ id: string
         director: movie.director || "",
         actorIds: movie.cast?.map((c: any) => c.actorId || c.actor?.id).filter(Boolean) || [],
         genreIds: movie.genres?.map((g: any) => g.genreId || g.genre?.id).filter(Boolean) || [],
+        streamingPlatFrom: movie.streamingPlatFrom || "OTHER",
       });
       setExistingPoster(movie.poster || movie.posterUrl || null);
       setExistingBackdrop(movie.backdrop || movie.backdropUrl || null);
@@ -193,6 +195,25 @@ export default function EditMoviePage({ params }: { params: Promise<{ id: string
                     <input required name="trailerUrl" value={formData.trailerUrl} placeholder="Trailer URL" className={`${inputBase} pl-10`} onChange={handleChange} />
                   </div>
                 </div>
+              </div>
+
+              <div>
+                <label className={labelBase}>Streaming Platform</label>
+                <select
+                  name="streamingPlatFrom"
+                  className={inputBase}
+                  onChange={handleChange}
+                  value={formData.streamingPlatFrom}
+                >
+                  <option value="NETFLIX">Netflix</option>
+                  <option value="AMAZON_PRIME">Amazon Prime</option>
+                  <option value="DISNEY_PLUS">Disney+</option>
+                  <option value="HBO_MAX">HBO Max</option>
+                  <option value="HULU">Hulu</option>
+                  <option value="APPLE_TV">Apple TV</option>
+                  <option value="YOUTUBE">YouTube</option>
+                  <option value="OTHER">Other</option>
+                </select>
               </div>
             </div>
 
