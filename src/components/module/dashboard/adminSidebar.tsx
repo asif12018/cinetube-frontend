@@ -28,7 +28,7 @@ export function AdminSidebar({ closeMobile }: { closeMobile?: () => void }) {
       {/* Header */}
       <div className="p-6 border-b border-gray-800 flex justify-between items-center">
         <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-red-600 to-red-400 bg-clip-text text-transparent">
-          CineHub <span className="text-sm text-gray-400 tracking-widest uppercase block mt-1">Admin</span>
+          CineTube <span className="text-sm text-gray-400 tracking-widest uppercase block mt-1">Admin</span>
         </Link>
         {/* Mobile Close Button */}
         {closeMobile && (
