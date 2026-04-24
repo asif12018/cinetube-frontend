@@ -28,6 +28,12 @@ export const registerZodSchema = z.object({
   // .regex(/[@$!%*?&]/, "Password must contain at least one special character (@, $, !, %, *, ?, &)")
   image: z
     .instanceof(File, { message: "Please upload a valid image file." })
+    .refine((file) => file.size <= 2 * 1024 * 1024, {
+      message: "Image size must be less than 2MB.",
+    })
+    .refine((file) => ["image/jpeg", "image/jpg", "image/png"].includes(file.type), {
+      message: "Only .jpg, .jpeg, .png formats are supported.",
+    })
     .optional(),
   gender: z.string("Gender must be a string"),
 });

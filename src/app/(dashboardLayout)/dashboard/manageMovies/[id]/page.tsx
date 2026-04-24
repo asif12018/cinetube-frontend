@@ -77,9 +77,20 @@ export default function EditMoviePage({ params }: { params: Promise<{ id: string
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'poster' | 'backdrop') => {
-    if (e.target.files && e.target.files[0]) {
-      if (type === 'poster') setPosterFile(e.target.files[0]);
-      if (type === 'backdrop') setBackdropFile(e.target.files[0]);
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error("Image size must be less than 2MB");
+        e.target.value = '';
+        return;
+      }
+      if (!["image/jpeg", "image/jpg", "image/png"].includes(file.type)) {
+        toast.error("Only .jpg, .jpeg, .png formats are supported");
+        e.target.value = '';
+        return;
+      }
+      if (type === 'poster') setPosterFile(file);
+      if (type === 'backdrop') setBackdropFile(file);
     }
   };
 
@@ -285,7 +296,7 @@ export default function EditMoviePage({ params }: { params: Promise<{ id: string
                     )}
                     <ImageIcon className={`w-8 h-8 text-gray-600 mx-auto mb-2 group-hover:text-red-500 ${existingPoster && !posterFile ? 'hidden' : ''}`} />
                     <p className="text-xs text-gray-500 mb-2 uppercase font-bold">Replace Poster Image</p>
-                    <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, 'poster')} />
+                    <input type="file" accept="image/png, image/jpeg, image/jpg" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, 'poster')} />
                     {posterFile && <p className="text-xs text-green-500 font-bold truncate">{posterFile.name}</p>}
                  </div>
 
@@ -297,7 +308,7 @@ export default function EditMoviePage({ params }: { params: Promise<{ id: string
                     )}
                     <ImageIcon className={`w-8 h-8 text-gray-600 mx-auto mb-2 group-hover:text-red-500 ${existingBackdrop && !backdropFile ? 'hidden' : ''}`} />
                     <p className="text-xs text-gray-500 mb-2 uppercase font-bold">Replace Backdrop Image</p>
-                    <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, 'backdrop')} />
+                    <input type="file" accept="image/png, image/jpeg, image/jpg" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => handleFileChange(e, 'backdrop')} />
                     {backdropFile && <p className="text-xs text-green-500 font-bold truncate">{backdropFile.name}</p>}
                  </div>
                </div>

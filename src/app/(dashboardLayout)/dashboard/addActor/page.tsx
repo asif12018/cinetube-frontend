@@ -252,8 +252,27 @@ export default function ManageActorsPage() {
                   
                   <input 
                     type="file" 
-                    accept="image/*"
-                    onChange={(e) => setPhotoFile(e.target.files?.[0] || null)}
+                    accept="image/png, image/jpeg, image/jpg"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        if (file.size > 2 * 1024 * 1024) {
+                          toast.error("Image size must be less than 2MB");
+                          e.target.value = '';
+                          setPhotoFile(null);
+                          return;
+                        }
+                        if (!["image/jpeg", "image/jpg", "image/png"].includes(file.type)) {
+                          toast.error("Only .jpg, .jpeg, .png formats are supported");
+                          e.target.value = '';
+                          setPhotoFile(null);
+                          return;
+                        }
+                        setPhotoFile(file);
+                      } else {
+                        setPhotoFile(null);
+                      }
+                    }}
                     className="absolute inset-0 opacity-0 cursor-pointer" 
                   />
                   

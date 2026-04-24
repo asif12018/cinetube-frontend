@@ -68,9 +68,20 @@ export default function AddMoviesPage() {
     e: React.ChangeEvent<HTMLInputElement>,
     type: "poster" | "backdrop",
   ) => {
-    if (e.target.files && e.target.files[0]) {
-      if (type === "poster") setPosterFile(e.target.files[0]);
-      if (type === "backdrop") setBackdropFile(e.target.files[0]);
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error("Image size must be less than 2MB");
+        e.target.value = '';
+        return;
+      }
+      if (!["image/jpeg", "image/jpg", "image/png"].includes(file.type)) {
+        toast.error("Only .jpg, .jpeg, .png formats are supported");
+        e.target.value = '';
+        return;
+      }
+      if (type === "poster") setPosterFile(file);
+      if (type === "backdrop") setBackdropFile(file);
     }
   };
 
@@ -379,6 +390,7 @@ export default function AddMoviesPage() {
                   </p>
                   <input
                     type="file"
+                    accept="image/png, image/jpeg, image/jpg"
                     className="absolute inset-0 opacity-0 cursor-pointer"
                     onChange={(e) => handleFileChange(e, "poster")}
                   />
@@ -396,6 +408,7 @@ export default function AddMoviesPage() {
                   </p>
                   <input
                     type="file"
+                    accept="image/png, image/jpeg, image/jpg"
                     className="absolute inset-0 opacity-0 cursor-pointer"
                     onChange={(e) => handleFileChange(e, "backdrop")}
                   />

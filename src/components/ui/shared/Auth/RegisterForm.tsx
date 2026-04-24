@@ -18,6 +18,7 @@ import { Eye, EyeOff, User } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import AppField from "../form/AppField";
 import AppSubmitButton from "../form/AppSubmitButton";
 import { registerZodSchema } from "@/app/zod/auth.validation";
@@ -232,13 +233,28 @@ const RegisterForm = ({ redirectPath }: RegisterFormProps) => {
                   {/* Shadcn Input customized for files */}
                   <Input
                     type="file"
-                    accept="image/*"
+                    accept="image/png, image/jpeg, image/jpg"
                     className="cursor-pointer file:text-white file:bg-gray-800 file:border-0 file:mr-4 file:px-4 file:py-2 hover:file:bg-gray-700"
                     onChange={(e) => {
                       // 1. Grab the file from the event
                       const file = e.target.files?.[0];
 
                       if (file) {
+                        if (file.size > 2 * 1024 * 1024) {
+                          e.target.value = '';
+                          field.handleChange(undefined);
+                          setPreviewUrl(null);
+                          toast.error("Image size must be less than 2MB");
+                          return;
+                        }
+                        if (!["image/jpeg", "image/jpg", "image/png"].includes(file.type)) {
+                          e.target.value = '';
+                          field.handleChange(undefined);
+                          setPreviewUrl(null);
+                          toast.error("Only .jpg, .jpeg, .png formats are supported");
+                          return;
+                        }
+
                         // 2. Tell the form state about the file
                         field.handleChange(file);
 
