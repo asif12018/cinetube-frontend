@@ -143,7 +143,7 @@ export default function MediaPage() {
               onChange={(e) => handleFilterChange("avgRating[gte]", e.target.value)}
             >
               <option value="">Any Rating</option>
-              {[1, 2, 3, 4, 5].map((num) => (
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                 <option key={num} value={num.toString()}>{num}+ Stars</option>
               ))}
             </select>
