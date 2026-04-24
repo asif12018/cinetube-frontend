@@ -268,7 +268,7 @@ function ReviewCard({ review, isAdmin }: { review: any; isAdmin?: boolean }) {
         ) : (
           // NORMAL VIEW MODE
           <>
-            {review.isSpoiler && !revealSpoiler ? (
+            {review.tags?.some((t: any) => t.tag.name === "Spoiler Alert") && !revealSpoiler ? (
               <div 
                 className="bg-black/30 border border-red-500/20 p-4 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-black/40 transition-colors"
                 onClick={() => setRevealSpoiler(true)}

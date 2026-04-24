@@ -16,7 +16,6 @@ export default function CreateReviewForm({ movieId }: { movieId: string }) {
   const [hoveredRating, setHoveredRating] = useState(0);
   const [content, setContent] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [isSpoiler, setIsSpoiler] = useState(false);
   
   // UI State
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -57,8 +56,7 @@ export default function CreateReviewForm({ movieId }: { movieId: string }) {
       const payload = {
         rating,
         content,
-        tags: selectedTags,
-        isSpoiler
+        tags: selectedTags
       };
 
       const res:any = await createReview(payload, movieId);
@@ -83,7 +81,6 @@ export default function CreateReviewForm({ movieId }: { movieId: string }) {
         setHoveredRating(0);
         setContent("");
         setSelectedTags([]);
-        setIsSpoiler(false);
         setIsDropdownOpen(false);
 
         
@@ -138,20 +135,6 @@ export default function CreateReviewForm({ movieId }: { movieId: string }) {
             placeholder="What did you think of the movie?"
             className="w-full bg-black/40 border border-gray-700 rounded-md p-3 text-white focus:outline-none focus:border-red-500 min-h-[120px] transition-colors resize-y"
           />
-        </div>
-
-        {/* SPOILER CHECKBOX */}
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            id="isSpoiler"
-            checked={isSpoiler}
-            onChange={(e) => setIsSpoiler(e.target.checked)}
-            className="w-4 h-4 rounded border-gray-600 bg-black/40 text-red-600 focus:ring-red-600"
-          />
-          <label htmlFor="isSpoiler" className="text-sm font-medium text-red-400 cursor-pointer select-none">
-            This review contains spoilers
-          </label>
         </div>
 
         {/* TAGS DROPDOWN */}
