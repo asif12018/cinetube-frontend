@@ -116,6 +116,15 @@ export function Footer() {
                   Trending Now
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/about"
+                  className="text-muted-foreground hover:text-primary transition-colors text-sm flex items-center"
+                >
+                  <span className="h-1 w-1 rounded-full bg-primary mr-2 opacity-0 -ml-3 transition-all"></span>
+                  About Us
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -125,7 +134,7 @@ export function Footer() {
             <ul className="space-y-4">
               <li>
                 <Link
-                  href="#"
+                  href="/faq"
                   className="text-muted-foreground hover:text-primary transition-colors text-sm flex items-center"
                 >
                   <span className="h-1 w-1 rounded-full bg-primary mr-2 opacity-0 -ml-3 transition-all"></span>
@@ -134,7 +143,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="#"
+                  href="/contact"
                   className="text-muted-foreground hover:text-primary transition-colors text-sm flex items-center"
                 >
                   <span className="h-1 w-1 rounded-full bg-primary mr-2 opacity-0 -ml-3 transition-all"></span>
