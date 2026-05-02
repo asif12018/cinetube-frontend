@@ -16,7 +16,7 @@ export const commonProtectedRoutes : RouteConfig = {
     pattern: [
         // 🟢 This regex matches any route that starts with /movie/ followed by an ID
         // But it ignores the base /movie route!
-        /^\/movie\/[^\/]+(?:\/|$)/ 
+        // /^\/movie\/[^\/]+(?:\/|$)/ 
     ]
 }
 
