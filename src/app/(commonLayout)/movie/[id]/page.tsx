@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, use, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import type ReactPlayerType from "react-player";
@@ -30,6 +31,8 @@ import { AiContentWarning } from "@/components/ui/ai-content-warning";
 export default function MovieDetailsPage({ params }: { params: Promise<{ id: string }> }) { 
   const { id } = use(params); 
 
+  const router = useRouter();
+
   const [playingUrl, setPlayingUrl] = useState<string | null>(null);
   const [isIntroPlaying, setIsIntroPlaying] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
@@ -39,6 +42,15 @@ export default function MovieDetailsPage({ params }: { params: Promise<{ id: str
 
   const [isUserCreatedReview, setIsUserCreatedReview] = useState(false);
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
+
+  // Redirect unauthenticated users to login, preserving the current URL as ?redirect=
+  const requireAuth = () => {
+    if (!isUserLoggedIn) {
+      router.push(`/login?redirect=/movie/${id}`);
+      return false;
+    }
+    return true;
+  };
 
   const handleLaunchVideo = (url: string) => {
     setPlayingUrl(url);
@@ -233,8 +245,8 @@ export default function MovieDetailsPage({ params }: { params: Promise<{ id: str
     }
   };
 
-  // Prevent UI flickering while fetching statuses
-  if (isLoading || isSubscribtionLoading || isPurchaseLoading || isWatchListCheckLoading || isUserInfoResponseLoading) {
+  // Only block render on media data — auth/subscription load in the background
+  if (isLoading || isSubscribtionLoading || isPurchaseLoading || isWatchListCheckLoading) {
     return (
       <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
         <div className="w-12 h-12 border-4 border-border border-t-red-600 rounded-full animate-spin" />
@@ -299,44 +311,56 @@ export default function MovieDetailsPage({ params }: { params: Promise<{ id: str
             
             {hasAccess ? (
               <button 
-                onClick={() => handleLaunchVideo(movie.streamingUrl)} 
+                onClick={() => { if (requireAuth()) handleLaunchVideo(movie.streamingUrl); }} 
                 className="flex items-center gap-2 bg-white text-black px-6 py-2.5 md:px-8 md:py-3 rounded-md font-bold text-lg hover:bg-white/80 transition-colors"
               >
                 <Play className="w-6 h-6 fill-current" /> Play
               </button>
             ) : (
               <>
-                <button 
-                  onClick={() => handleCheckout("SUBSCRIPTION")}
-                  disabled={isRedirecting}
-                  className="flex items-center gap-2 bg-red-600 text-white px-6 py-2.5 md:px-8 md:py-3 rounded-md font-bold text-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isRedirecting ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
-                  Subscribe to Watch
-                </button>
-                
-                <button 
-                  onClick={() => handleCheckout("RENTAL")}
-                  disabled={isRedirecting}
-                  className="flex items-center gap-2 bg-muted text-white px-6 py-2.5 md:px-8 md:py-3 rounded-md font-bold text-lg hover:bg-gray-700 transition-colors border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isRedirecting ? <Loader2 className="w-5 h-5 animate-spin" /> : <CreditCard className="w-5 h-5" />}
-                  Rent 48hr ({rentPrice})
-                </button>
+                {/* If not logged in at all — show a single Sign In to Watch button */}
+                {!isUserLoggedIn ? (
+                  <button
+                    onClick={() => requireAuth()}
+                    className="flex items-center gap-2 bg-white text-black px-6 py-2.5 md:px-8 md:py-3 rounded-md font-bold text-lg hover:bg-white/80 transition-colors"
+                  >
+                    <Play className="w-6 h-6 fill-current" /> Sign In to Watch
+                  </button>
+                ) : (
+                  <>
+                    <button 
+                      onClick={() => { if (requireAuth()) handleCheckout("SUBSCRIPTION"); }}
+                      disabled={isRedirecting}
+                      className="flex items-center gap-2 bg-red-600 text-white px-6 py-2.5 md:px-8 md:py-3 rounded-md font-bold text-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isRedirecting ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
+                      Subscribe to Watch
+                    </button>
+                    
+                    <button 
+                      onClick={() => { if (requireAuth()) handleCheckout("RENTAL"); }}
+                      disabled={isRedirecting}
+                      className="flex items-center gap-2 bg-muted text-white px-6 py-2.5 md:px-8 md:py-3 rounded-md font-bold text-lg hover:bg-gray-700 transition-colors border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isRedirecting ? <Loader2 className="w-5 h-5 animate-spin" /> : <CreditCard className="w-5 h-5" />}
+                      Rent 48hr ({rentPrice})
+                    </button>
 
-                <button 
-                  onClick={() => handleCheckout("ONE_TIME_BUY")}
-                  disabled={isRedirecting}
-                  className="flex items-center gap-2 bg-muted text-white px-6 py-2.5 md:px-8 md:py-3 rounded-md font-bold text-lg hover:bg-gray-700 transition-colors border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isRedirecting ? <Loader2 className="w-5 h-5 animate-spin" /> : <ShoppingCart className="w-5 h-5" />}
-                  Buy ({buyPrice})
-                </button>
+                    <button 
+                      onClick={() => { if (requireAuth()) handleCheckout("ONE_TIME_BUY"); }}
+                      disabled={isRedirecting}
+                      className="flex items-center gap-2 bg-muted text-white px-6 py-2.5 md:px-8 md:py-3 rounded-md font-bold text-lg hover:bg-gray-700 transition-colors border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isRedirecting ? <Loader2 className="w-5 h-5 animate-spin" /> : <ShoppingCart className="w-5 h-5" />}
+                      Buy ({buyPrice})
+                    </button>
+                  </>
+                )}
               </>
             )}
 
             <button 
-              onClick={handleWatchlistToggle}
+              onClick={() => { if (requireAuth()) handleWatchlistToggle(); }}
               disabled={isWatchlistLoading}
               className="flex items-center justify-center w-12 h-12 md:w-14 md:h-14 bg-gray-500/40 text-white rounded-full hover:bg-gray-500/60 transition-colors backdrop-blur-sm border border-gray-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -357,6 +381,8 @@ export default function MovieDetailsPage({ params }: { params: Promise<{ id: str
                 <Info className="w-6 h-6" /> Trailer
               </button>
             )}
+            
+            {/* Trailer is always public — no auth needed */}
           </div>
 
           <div className="text-sm md:text-base text-gray-300 max-w-2xl leading-relaxed">
