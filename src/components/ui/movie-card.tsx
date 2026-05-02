@@ -17,7 +17,7 @@ export function MovieCard({ movie, className = "" }: MovieCardProps) {
   return (
     <Link
       href={`/movie/${movie.id}`}
-      className={`group relative block w-36 md:w-48 h-56 md:h-72 rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-110 hover:z-10 mx-2 md:mx-3 ${className}`}
+      className={`group relative block w-full max-w-[200px] sm:max-w-[240px] md:max-w-[280px] aspect-[2/3] mx-auto rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-110 hover:z-10 ${className}`}
     >
       <div className="relative h-full w-full">
         <Image

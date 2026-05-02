@@ -15,6 +15,7 @@ import {
   Shield,
   Bell,
   HelpCircle,
+  LayoutDashboard,
   Info,
   Mail,
 } from "lucide-react";
@@ -173,13 +174,32 @@ export function Navbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-[100] bg-gradient-to-b from-black/90 to-transparent p-4 md:p-6 transition-all duration-300">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-        {/* Logo */}
-        <Link
-          href="/"
-          className="text-2xl font-bold bg-gradient-to-r from-red-600 to-red-400 bg-clip-text text-transparent shrink-0 tracking-tight"
-        >
-          CineTube
-        </Link>
+        {/* Logo and Main Nav Links */}
+        <div className="flex items-center gap-6">
+          <Link
+            href="/"
+            className="text-2xl font-bold bg-gradient-to-r from-red-600 to-red-400 bg-clip-text text-transparent shrink-0 tracking-tight"
+          >
+            CineTube
+          </Link>
+
+          {/* Desktop Explicit Navigation Links */}
+          <div className="hidden lg:flex items-center gap-5">
+            <Link href="/" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Home</Link>
+            <Link href="/movie" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Movies</Link>
+            <Link href="/pricing" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Pricing</Link>
+            <Link href="/faq" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">FAQ</Link>
+            
+            {user && (
+              <>
+                <Link href="/dashboard" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
+                  Dashboard
+                </Link>
+                <Link href="/dashboard/profile" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">Profile</Link>
+              </>
+            )}
+          </div>
+        </div>
 
         {/* Search Section */}
         <div
@@ -254,24 +274,6 @@ export function Navbar() {
           <button className="md:hidden p-2 hover:bg-white/10 rounded-full transition-colors">
             <Search className="w-5 h-5 text-white" />
           </button>
-
-          {user?.role === "USER" && (
-            <Link
-              href="/movie"
-              className="hidden sm:block text-sm font-medium text-white hover:text-white transition-colors"
-            >
-              Movie
-            </Link>
-          )}
-
-          {isAdmin && (
-            <Link
-              href="/dashboard"
-              className="hidden sm:block text-sm font-medium text-white hover:text-white transition-colors"
-            >
-              Dashboard
-            </Link>
-          )}
 
           <div className="flex items-center justify-center">
             <ThemeToggle />
@@ -438,6 +440,14 @@ export function Navbar() {
                     </div>
 
                     <div className="p-2 flex flex-col gap-1">
+                      <Link
+                        href="/dashboard"
+                        onClick={() => setIsProfileOpen(false)}
+                        className="flex items-center gap-3 px-3 py-2 text-sm text-foreground hover:bg-black/10 dark:hover:bg-white/10 rounded-md transition-colors"
+                      >
+                        <LayoutDashboard className="w-4 h-4 text-muted-foreground" />
+                        Dashboard
+                      </Link>
                       {/* <Link
                         href="/watchList"
                         onClick={() => setIsProfileOpen(false)}

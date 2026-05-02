@@ -3,21 +3,38 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Film, Edit, Trash2, Search, Plus } from "lucide-react";
+import { Film, Edit, Trash2, Search, Plus, ChevronLeft, ChevronRight, Filter } from "lucide-react";
 import { toast } from "sonner";
 import { getMedia, deleteMedia } from "@/service/media.service";
 import Image from "next/image";
 
 export default function ManageMoviesPage() {
   const queryClient = useQueryClient();
-  const [searchTerm, setSearchTerm] = useState("");
+  const [filters, setFilters] = useState({
+    searchTerm: "",
+    status: "",
+    pricingTier: "",
+    page: 1,
+    limit: 10,
+  });
+
+  const queryString = new URLSearchParams(
+    Object.entries(filters)
+      .filter(([_, v]) => v !== "")
+      .map(([k, v]) => [k, String(v)]) 
+  ).toString();
 
   const { data: media, isLoading } = useQuery({
-    queryKey: ["admin-media", searchTerm],
-    queryFn: () => getMedia(searchTerm ? `searchTerm=${searchTerm}` : "")
+    queryKey: ["admin-media", filters],
+    queryFn: () => getMedia(queryString)
   });
 
   const moviesList = media?.data?.data?.data || media?.data?.data || media?.data || [];
+  const meta = media?.meta || media?.data?.meta || { page: 1, totalPages: 1 };
+
+  const handleFilterChange = (key: string, value: string | number) => {
+    setFilters((prev) => ({ ...prev, [key]: value, ...(key !== "page" ? { page: 1 } : {}) }));
+  };
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteMedia(id),
@@ -47,16 +64,45 @@ export default function ManageMoviesPage() {
             <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">Manage Movies</h1>
             <p className="text-muted-foreground mt-2">View, edit, or delete media from the platform.</p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
+            {/* Search Filter */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
               <input 
                 type="text" 
                 placeholder="Search movies..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                value={filters.searchTerm}
+                onChange={(e) => handleFilterChange("searchTerm", e.target.value)}
                 className="bg-[#1a1a1a] border border-border rounded-lg py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-all w-full md:w-64"
               />
+            </div>
+            
+            {/* Status Filter */}
+            <div className="relative">
+              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+              <select
+                value={filters.status}
+                onChange={(e) => handleFilterChange("status", e.target.value)}
+                className="appearance-none bg-[#1a1a1a] border border-border rounded-lg py-2.5 pl-10 pr-8 text-sm focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-all cursor-pointer"
+              >
+                <option value="">All Statuses</option>
+                <option value="PUBLISHED">Published</option>
+                <option value="UNPUBLISHED">Unpublished</option>
+              </select>
+            </div>
+
+            {/* Tier Filter */}
+            <div className="relative">
+              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+              <select
+                value={filters.pricingTier}
+                onChange={(e) => handleFilterChange("pricingTier", e.target.value)}
+                className="appearance-none bg-[#1a1a1a] border border-border rounded-lg py-2.5 pl-10 pr-8 text-sm focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-all cursor-pointer"
+              >
+                <option value="">All Tiers</option>
+                <option value="FREE">Free</option>
+                <option value="PREMIUM">Premium</option>
+              </select>
             </div>
             <Link 
               href="/dashboard/addMovies"
@@ -155,6 +201,46 @@ export default function ManageMoviesPage() {
             </table>
           </div>
         </div>
+
+        {/* Pagination Section */}
+        {!isLoading && meta.totalPages > 1 && (
+          <div className="flex items-center justify-between mt-6 bg-background border border-border p-4 rounded-xl shadow-md">
+            <span className="text-sm text-muted-foreground">
+              Showing Page <span className="font-bold text-foreground">{meta.page}</span> of <span className="font-bold text-foreground">{meta.totalPages}</span>
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handleFilterChange("page", meta.page - 1)}
+                disabled={meta.page <= 1}
+                className="p-2 rounded-lg bg-muted hover:bg-red-600 disabled:opacity-30 disabled:hover:bg-muted transition-all"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              
+              <div className="flex gap-1 hidden sm:flex">
+                {[...Array(meta.totalPages)].map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleFilterChange("page", i + 1)}
+                    className={`w-8 h-8 rounded-lg text-sm font-semibold transition-all ${
+                      meta.page === i + 1 ? "bg-red-600 text-white" : "bg-muted text-foreground hover:bg-gray-600"
+                    }`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => handleFilterChange("page", meta.page + 1)}
+                disabled={meta.page >= meta.totalPages}
+                className="p-2 rounded-lg bg-muted hover:bg-red-600 disabled:opacity-30 disabled:hover:bg-muted transition-all"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

@@ -15,7 +15,7 @@ import {
 
 import { useForm } from "@tanstack/react-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Zap } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -38,6 +38,7 @@ const LoginForm = ({ redirectPath }: LoginFormProps) => {
   const [serverError, setServerError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [isDemoLoading, setIsDemoLoading] = useState(false);
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: (payload: ILoginPayload) => loginAction(payload, redirectPath),
@@ -162,7 +163,7 @@ const LoginForm = ({ redirectPath }: LoginFormProps) => {
             </Alert>
           )}
 
-          <div className="pt-4">
+          <div className="pt-4 flex flex-col gap-3">
             <form.Subscribe
               selector={(s) => [s.canSubmit, s.isSubmitting] as const}
             >
@@ -177,6 +178,60 @@ const LoginForm = ({ redirectPath }: LoginFormProps) => {
                 </AppSubmitButton>
               )}
             </form.Subscribe>
+
+            {/* Demo Login Button */}
+            <Button
+              type="button"
+              disabled={isDemoLoading || isPending}
+              onClick={async () => {
+                setIsDemoLoading(true);
+                setServerError(null);
+                setSuccessMessage(null);
+                try {
+                  const result = (await mutateAsync({
+                    email: "demo@user.com",
+                    password: "demo@user.com",
+                  })) as any;
+
+                  if (!result.success) {
+                    setServerError(result.message || "Demo login failed");
+                    return;
+                  }
+
+                  setSuccessMessage("Demo login successful! Redirecting...");
+                  queryClient.invalidateQueries({ queryKey: ["user"] });
+                  setTimeout(() => {
+                    window.location.href = result.redirectUrl || "/";
+                  }, 1000);
+                } catch (error: any) {
+                  if (
+                    error?.message === "NEXT_REDIRECT" ||
+                    error?.digest?.startsWith("NEXT_REDIRECT")
+                  ) {
+                    throw error;
+                  }
+                  setServerError(`Demo login failed: ${error.message}`);
+                } finally {
+                  setIsDemoLoading(false);
+                }
+              }}
+              className="w-full h-[48px] bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-bold text-[16px] rounded-[4px] flex items-center justify-center gap-2 transition-all duration-200 shadow-lg shadow-amber-500/20"
+            >
+              {isDemoLoading ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                  </svg>
+                  Signing in as Demo...
+                </>
+              ) : (
+                <>
+                  <Zap className="h-4 w-4" />
+                  Demo Login
+                </>
+              )}
+            </Button>
           </div>
 
           <div className="flex justify-between items-center mt-4">

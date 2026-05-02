@@ -10,12 +10,13 @@ import { toast } from "sonner";
 import { Navbar } from "@/components/ui/navbar";
 import { Play, Info, X, ShoppingCart, CreditCard, Loader2, Plus, Check, Lock, CheckCircle } from "lucide-react"; 
 
-import { getMediaById } from "@/service/media.service"; 
+import { getMediaById, getMedia } from "@/service/media.service"; 
 import { getPurchaseInfo, getSubscriptionInfo, purchaseAMovie } from "@/service/payment.service";
 import { toggleWatchList, checkTheMovieOnWatchList } from "@/service/watchlist.service"; 
 
 import ReviewElement from "@/components/module/review/reviewElement";
 import CreateReviewForm from "@/components/module/review/reviewForm";
+import { MovieCard } from "@/components/ui/movie-card";
 import { getUserInfo } from "@/service/auth.service";
 import { isUserHasAreview } from "@/service/review.service";
 
@@ -117,6 +118,39 @@ export default function MovieDetailsPage({ params }: { params: Promise<{ id: str
       setIsWatchlisted(isListed);
     }
   }, [watchListCheckResponse]);
+
+  // 5️⃣ Fetch Related Movies (Fetch a general pool, sort by matching genre locally to guarantee 4 cards)
+  const firstGenre = movie?.genres?.[0]?.genre?.name || "";
+  const queryStr = `limit=10`;
+  
+  const { data: relatedMediaResponse } = useQuery<any>({
+    queryKey: ["related-media", "fallback-pool"],
+    queryFn: () => getMedia(queryStr),
+    enabled: !!movie?.id,
+  });
+
+  let rawRelatedData = [];
+  if (Array.isArray(relatedMediaResponse)) {
+    rawRelatedData = relatedMediaResponse;
+  } else if (Array.isArray(relatedMediaResponse?.data)) {
+    rawRelatedData = relatedMediaResponse.data;
+  } else if (Array.isArray(relatedMediaResponse?.data?.data)) {
+    rawRelatedData = relatedMediaResponse.data.data;
+  } else if (Array.isArray(relatedMediaResponse?.data?.data?.data)) {
+    rawRelatedData = relatedMediaResponse.data.data.data;
+  }
+
+  const relatedMovies = rawRelatedData
+    .filter((m: any) => m.id !== movie?.id)
+    .sort((a: any, b: any) => {
+      // Prioritize movies that share the same first genre
+      const aHasGenre = a.genres?.some((g: any) => g.genre?.name === firstGenre);
+      const bHasGenre = b.genres?.some((g: any) => g.genre?.name === firstGenre);
+      if (aHasGenre && !bHasGenre) return -1;
+      if (!aHasGenre && bHasGenre) return 1;
+      return 0;
+    })
+    .slice(0, 4);
 
   const isSetToCancel = 
     subscribtionResponse?.cancelAtPeriodEnd === true || 
@@ -385,6 +419,28 @@ export default function MovieDetailsPage({ params }: { params: Promise<{ id: str
             <p className="text-sm text-gray-500 mt-4">
               Don't have an account? <Link href="/register" className="text-red-400 hover:text-red-300 hover:underline transition-colors">Sign up here</Link>
             </p>
+          </div>
+        )}
+      </div>
+
+      {/* 🟢 RELATED ITEMS SECTION */}
+      <div className="w-full max-w-7xl mx-auto px-4 md:px-12 mt-12 mb-24">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-foreground">
+            Related Items
+          </h2>
+        </div>
+        {relatedMovies.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
+            {relatedMovies.map((relatedMovie: any) => (
+              <div key={relatedMovie.id} className="transition-transform duration-300 hover:scale-105 cursor-pointer">
+                <MovieCard movie={relatedMovie} />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center p-8 bg-muted/20 border border-border rounded-xl">
+            <p className="text-muted-foreground text-center">More items in this category are coming soon!</p>
           </div>
         )}
       </div>

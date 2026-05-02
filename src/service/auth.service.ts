@@ -80,10 +80,41 @@ export async function getUserInfo() {
     }
 }
 
+export async function updateUserProfile(userId: string, formData: FormData) {
+    try {
+        const cookieStore = await cookies();
+        const accessToken = cookieStore.get("accessToken")?.value;
+        const sessionToken = cookieStore.get("better-auth.session_token")?.value;
 
+        if (!accessToken) {
+            return { success: false, message: "No token provided" };
+        }
 
+        const res = await fetch(`${BASE_API_URL}/auth/update-user/${userId}`, {
+            method: "PATCH",
+            headers: {
+                // Next.js automatically sets the correct Content-Type with boundary for FormData
+                Authorization: `Bearer ${accessToken}`,
+                Cookie: `accessToken=${accessToken}; better-auth.session_token=${sessionToken}`
+            },
+            body: formData,
+        });
 
+        if (!res.ok) {
+            const errorData = await res.json().catch(() => null);
+            return { 
+                success: false, 
+                message: errorData?.message || `Failed to update profile: ${res.statusText}` 
+            };
+        }
 
+        const { data } = await res.json();
+        return { success: true, data };
+    } catch (error: any) {
+        console.error("Error updating user info:", error);
+        return { success: false, message: error.message || "An unexpected error occurred" };
+    }
+}
 
 export async function logoutUserAction() {
   try {

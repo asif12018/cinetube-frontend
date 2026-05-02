@@ -1,5 +1,7 @@
 "use client"
 import Link from "next/link";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Film, Mail } from "lucide-react";
 import { Button } from "./button";
 
@@ -31,6 +33,16 @@ const YoutubeIcon = ({ className }: { className?: string }) => (
 );
 
 export function Footer() {
+  const [email, setEmail] = useState("");
+
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+    
+    toast.success("Thanks for subscribing! You will get our latest updates and news from now on.");
+    setEmail("");
+  };
+
   return (
     <footer className="w-full bg-background border-t border-border mt-auto">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-16 pb-8">
@@ -180,7 +192,7 @@ export function Footer() {
             </p>
             <form
               className="space-y-2 flex flex-col sm:flex-row sm:space-y-0 sm:space-x-2 lg:flex-col lg:space-y-2 lg:space-x-0"
-              onSubmit={(e) => e.preventDefault()}
+              onSubmit={handleSubscribe}
             >
               <div className="relative w-full">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -189,6 +201,8 @@ export function Footer() {
                   placeholder="Your email address"
                   className="w-full pl-10 pr-4 py-2.5 bg-secondary/50 border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                   required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
               <Button

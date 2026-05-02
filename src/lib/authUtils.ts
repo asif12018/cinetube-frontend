@@ -12,7 +12,7 @@ export type RouteConfig = {
 }
 
 export const commonProtectedRoutes : RouteConfig = {
-    exact : ["/my-profile", "/change-password", "/pricing"],
+    exact : ["/my-profile", "/change-password", "/pricing","/dashboard"],
     pattern: [
         // 🟢 This regex matches any route that starts with /movie/ followed by an ID
         // But it ignores the base /movie route!
@@ -25,10 +25,10 @@ export const userProtectedRoutes: RouteConfig = {
     exact: []
 };
 
-export const adminProtectedRoutes: RouteConfig = {
-    pattern: [/^\/dashboard(\/|$)/], 
-    exact: []
-};
+// export const adminProtectedRoutes: RouteConfig = {
+//     pattern: [/^\/dashboard(\/|$)/], 
+//     exact: []
+// };
 
 // export const superAdminProtectedRoutes : RouteConfig = {
 //     pattern: [/^\/admin\/dashboard/ ], // Matches any path that starts with /super-admin/dashboard
@@ -49,9 +49,9 @@ export const getRouteOwner = (pathname : string) : "SUPER_ADMIN" | "ADMIN" | "US
         return "USER"; // Fix: Changed from "DOCTOR"
     }
 
-    if(isRouteMatches(pathname, adminProtectedRoutes)) {
-        return "ADMIN";
-    }
+    // if(isRouteMatches(pathname, adminProtectedRoutes)) {
+    //     return "ADMIN";
+    // }
 
     // Removed the duplicated adminProtectedRoutes check that returned "PATIENT"
 

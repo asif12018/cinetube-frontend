@@ -112,6 +112,26 @@ function HomeContent() {
             {/* PRICING SECTION */}
             <Pricing />
             
+            {/* FAQ SECTION */}
+            <div className="w-full max-w-5xl mx-auto px-4 md:px-12 py-16">
+              <div className="text-center mb-10">
+                <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Frequently Asked Questions</h2>
+                <p className="text-muted-foreground text-lg">Everything you need to know about CineTube.</p>
+              </div>
+              <div className="space-y-4">
+                {[
+                  { q: "What is CineTube?", a: "CineTube is a premium movie streaming platform offering the latest blockbusters and timeless classics." },
+                  { q: "How much does it cost?", a: "You can watch movies for free, rent them for 48 hours, or subscribe for unlimited access." },
+                  { q: "Can I watch on multiple devices?", a: "Yes, you can stream on your TV, laptop, tablet, or smartphone." },
+                  { q: "How do I cancel my subscription?", a: "You can cancel your subscription at any time from your account settings." }
+                ].map((faq, index) => (
+                  <div key={index} className="bg-muted/30 border border-border rounded-xl p-6">
+                    <h3 className="text-xl font-semibold text-foreground mb-2">{faq.q}</h3>
+                    <p className="text-muted-foreground">{faq.a}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
         )}

@@ -12,22 +12,40 @@ import {
   X,
   Home,
   Loader2,
+  UserCircle,
+  ListVideo
 } from "lucide-react";
 import { toast } from "sonner";
-import { logoutUserAction } from "@/service/auth.service";
+import { logoutUserAction, getUserInfo } from "@/service/auth.service";
+import { useQuery } from "@tanstack/react-query";
 
 export function AdminSidebar({ closeMobile }: { closeMobile?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  const navLinks = [
+  const { data: user, isLoading } = useQuery({
+    queryKey: ["user"],
+    queryFn: getUserInfo,
+  });
+
+  const isAdmin = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
+
+  const adminNavLinks = [
     { name: "Overview", href: "/dashboard", icon: LayoutDashboard, exact: true },
     { name: "Add Movie/Series", href: "/dashboard/addMovies", icon: Film, exact: false },
     { name: "Manage Movies", href: "/dashboard/manageMovies", icon: Film, exact: false },
     { name: "Manage Actors", href: "/dashboard/addActor", icon: Users, exact: false },
     { name: "Pending Reviews", href: "/dashboard/reviews", icon: MessageSquareWarning, exact: false },
   ];
+
+  const userNavLinks = [
+    { name: "Overview", href: "/dashboard", icon: LayoutDashboard, exact: true },
+    { name: "Profile", href: "/dashboard/profile", icon: UserCircle, exact: false },
+    { name: "Watchlist", href: "/watchList", icon: ListVideo, exact: false },
+  ];
+
+  const navLinks = isAdmin ? adminNavLinks : userNavLinks;
 
   const handleLogout = async () => {
     try {
@@ -52,7 +70,7 @@ export function AdminSidebar({ closeMobile }: { closeMobile?: () => void }) {
       {/* Header */}
       <div className="p-6 border-b border-border flex justify-between items-center">
         <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-red-600 to-red-400 bg-clip-text text-transparent">
-          CineTube <span className="text-sm text-muted-foreground tracking-widest uppercase block mt-1">Admin</span>
+          CineTube <span className="text-sm text-muted-foreground tracking-widest uppercase block mt-1">{isAdmin ? "Admin" : "User"}</span>
         </Link>
         {/* Mobile Close Button */}
         {closeMobile && (
@@ -64,29 +82,35 @@ export function AdminSidebar({ closeMobile }: { closeMobile?: () => void }) {
 
       {/* Navigation Links */}
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-        {navLinks.map((link) => {
-          const Icon = link.icon;
-          // Exact match for root dashboard, prefix match for sub-pages
-          const isActive = link.exact
-            ? pathname === link.href
-            : pathname === link.href || pathname.startsWith(`${link.href}/`);
+        {isLoading ? (
+          <div className="flex items-center justify-center py-10">
+            <Loader2 className="w-6 h-6 animate-spin text-red-500" />
+          </div>
+        ) : (
+          navLinks.map((link) => {
+            const Icon = link.icon;
+            // Exact match for root dashboard, prefix match for sub-pages
+            const isActive = link.exact
+              ? pathname === link.href
+              : pathname === link.href || pathname.startsWith(`${link.href}/`);
 
-          return (
-            <Link
-              key={link.name}
-              href={link.href}
-              onClick={closeMobile}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${
-                isActive
-                  ? "bg-red-600/10 text-red-500 border border-red-600/20"
-                  : "text-muted-foreground hover:bg-black/5 dark:hover:bg-white/5 hover:text-foreground"
-              }`}
-            >
-              <Icon className={`w-5 h-5 ${isActive ? "text-red-500" : "text-gray-500"}`} />
-              {link.name}
-            </Link>
-          );
-        })}
+            return (
+              <Link
+                key={link.name}
+                href={link.href}
+                onClick={closeMobile}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${
+                  isActive
+                    ? "bg-red-600/10 text-red-500 border border-red-600/20"
+                    : "text-muted-foreground hover:bg-black/5 dark:hover:bg-white/5 hover:text-foreground"
+                }`}
+              >
+                <Icon className={`w-5 h-5 ${isActive ? "text-red-500" : "text-gray-500"}`} />
+                {link.name}
+              </Link>
+            );
+          })
+        )}
       </nav>
 
       {/* Footer Actions */}
