@@ -13,8 +13,9 @@ export async function sendEmailAction(formData: FormData) {
   
   // The user provided NEXT_PUBLIC_EMAILJS_PUBLIC_KEY in .env
   const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY; 
+  const privateKey = process.env.EMAILJS_PRIVATE_KEY;
 
-  if (!publicKey) {
+  if (!publicKey || !privateKey) {
     return { success: false, error: "Email configuration is missing." };
   }
 
@@ -28,6 +29,7 @@ export async function sendEmailAction(formData: FormData) {
         service_id: serviceId,
         template_id: templateId,
         user_id: publicKey,
+        accessToken: privateKey,
         template_params: {
           from_name: `${firstName} ${lastName}`,
           from_email: email,
