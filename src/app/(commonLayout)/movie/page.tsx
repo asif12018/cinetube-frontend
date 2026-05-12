@@ -5,7 +5,13 @@ import { Navbar } from "@/components/ui/navbar";
 import { MovieCard } from "@/components/ui/movie-card";
 import { getMedia, getMediaAllGenre } from "@/service/media.service";
 import { useQuery } from "@tanstack/react-query";
-import { Search as SearchIcon, X, ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
+import {
+  Search as SearchIcon,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  SlidersHorizontal,
+} from "lucide-react";
 import { AiMovieRecommendation } from "@/components/ui/ai-movie-recommendation";
 
 export default function MediaPage() {
@@ -13,10 +19,10 @@ export default function MediaPage() {
     searchTerm: "",
     sortBy: "",
     sortOrder: "",
-    "avgRating[gte]": "", 
+    "avgRating[gte]": "",
     streamingPlatFrom: "",
     "genres.genre.name": "",
-    page: 1, 
+    page: 1,
     limit: 12, // Switched to 12 for better grid math (2 rows of 6)
   };
 
@@ -36,7 +42,7 @@ export default function MediaPage() {
   const queryString = new URLSearchParams(
     Object.entries(filters)
       .filter(([_, v]) => v !== "")
-      .map(([k, v]) => [k, String(v)]) 
+      .map(([k, v]) => [k, String(v)]),
   ).toString();
 
   const { data: media, isLoading } = useQuery<any>({
@@ -50,7 +56,7 @@ export default function MediaPage() {
   const handleFilterChange = (key: string, value: string | number) => {
     setFilters((prev) => {
       let newFilters = { ...prev, [key]: value };
-      
+
       if (key === "sortBy" && value !== "") {
         newFilters.sortOrder = "desc";
       }
@@ -72,26 +78,26 @@ export default function MediaPage() {
   const genresList: any[] = Array.isArray(genresResponse)
     ? genresResponse
     : Array.isArray(genresResponse?.data?.data)
-    ? genresResponse.data.data
-    : Array.isArray(genresResponse?.data)
-    ? genresResponse.data
-    : [];
+      ? genresResponse.data.data
+      : Array.isArray(genresResponse?.data)
+        ? genresResponse.data
+        : [];
 
   // Reusable sleek styling for dropdowns
-  const selectStyle = "appearance-none bg-background border border-border/50 hover:border-gray-500 rounded-full py-2.5 px-5 text-sm outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-all cursor-pointer shadow-lg";
+  const selectStyle =
+    "appearance-none bg-background border border-border/50 hover:border-gray-500 rounded-full py-2.5 px-5 text-sm outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-all cursor-pointer shadow-lg";
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans flex flex-col">
-    
-
       <main className="pt-28 px-4 md:px-12 pb-16 flex-grow max-w-[2000px] mx-auto w-full">
-        
         {/* HEADER SECTION */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-          <h1 className="text-3xl md:text-foregroundxl font-bold tracking-tight">Movies & Series</h1>
-          
+          <h1 className="text-3xl md:text-foregroundxl font-bold tracking-tight">
+            Movies & Series
+          </h1>
+
           {/* Mobile Filter Toggle */}
-          <button 
+          <button
             className="md:hidden flex items-center gap-2 bg-muted py-2 px-4 rounded-md w-fit"
             onClick={() => setShowFilters(!showFilters)}
           >
@@ -103,9 +109,10 @@ export default function MediaPage() {
         <AiMovieRecommendation />
 
         {/* FILTER BAR - Netflix Style */}
-        <div className={`mb-12 transition-all ${showFilters ? "block" : "hidden md:block"}`}>
+        <div
+          className={`mb-12 transition-all ${showFilters ? "block" : "hidden md:block"}`}
+        >
           <div className="flex flex-wrap items-center gap-3 bg-black/20 p-2 rounded-2xl">
-            
             {/* Search - Primary Focus */}
             <div className="relative flex-grow min-w-[250px] md:max-w-md">
               <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -122,22 +129,27 @@ export default function MediaPage() {
             <select
               value={filters["genres.genre.name"]}
               className={selectStyle}
-              onChange={(e) => handleFilterChange("genres.genre.name", e.target.value)}
+              onChange={(e) =>
+                handleFilterChange("genres.genre.name", e.target.value)
+              }
             >
               <option value="">All Genres</option>
-              {genresList.map((genreItem: any) => (
-                !genreItem.isDeleted && (
-                  <option key={genreItem.id} value={genreItem.name}>
-                    {genreItem.name}
-                  </option>
-                )
-              ))}
+              {genresList.map(
+                (genreItem: any) =>
+                  !genreItem.isDeleted && (
+                    <option key={genreItem.id} value={genreItem.name}>
+                      {genreItem.name}
+                    </option>
+                  ),
+              )}
             </select>
 
             <select
               value={filters.streamingPlatFrom}
               className={selectStyle}
-              onChange={(e) => handleFilterChange("streamingPlatFrom", e.target.value)}
+              onChange={(e) =>
+                handleFilterChange("streamingPlatFrom", e.target.value)
+              }
             >
               <option value="">All Platforms</option>
               <option value="NETFLIX">Netflix</option>
@@ -153,11 +165,15 @@ export default function MediaPage() {
             <select
               value={filters["avgRating[gte]"]}
               className={selectStyle}
-              onChange={(e) => handleFilterChange("avgRating[gte]", e.target.value)}
+              onChange={(e) =>
+                handleFilterChange("avgRating[gte]", e.target.value)
+              }
             >
               <option value="">Any Rating</option>
               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-                <option key={num} value={num.toString()}>{num}+ Stars</option>
+                <option key={num} value={num.toString()}>
+                  {num}+ Stars
+                </option>
               ))}
             </select>
 
@@ -169,17 +185,19 @@ export default function MediaPage() {
               <option value="">Sort: Recommended</option>
               <option value="releaseYear">Newest Releases</option>
               <option value="avgRating">Highest Rated</option>
-              <option value="likes">Most Liked</option> 
+              <option value="likes">Most Liked</option>
             </select>
 
             {/* Reset Button (Only shows if a filter is active) */}
-            {Object.values(filters).some(val => val !== "" && val !== 1 && val !== 12) && (
-               <button 
-                 onClick={() => setFilters(initialState)} 
-                 className="flex items-center justify-center gap-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors rounded-full py-2.5 px-4 text-sm font-medium ml-auto"
-               >
-                 <X className="w-4 h-4" /> Clear All
-               </button>
+            {Object.values(filters).some(
+              (val) => val !== "" && val !== 1 && val !== 12,
+            ) && (
+              <button
+                onClick={() => setFilters(initialState)}
+                className="flex items-center justify-center gap-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors rounded-full py-2.5 px-4 text-sm font-medium ml-auto"
+              >
+                <X className="w-4 h-4" /> Clear All
+              </button>
             )}
           </div>
         </div>
@@ -187,14 +205,20 @@ export default function MediaPage() {
         {/* RESULTS GRID */}
         {isLoading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 gap-x-6 gap-y-12">
-             {[...Array(12)].map((_, i) => (
-               <div key={i} className="aspect-[2/3] bg-muted/40 rounded-md animate-pulse shadow-xl" />
-             ))}
+            {[...Array(12)].map((_, i) => (
+              <div
+                key={i}
+                className="aspect-[2/3] bg-muted/40 rounded-md animate-pulse shadow-xl"
+              />
+            ))}
           </div>
         ) : moviesList.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 gap-x-6 gap-y-12">
             {moviesList.map((movie: any) => (
-              <div key={movie.id} className="transition-transform duration-300 hover:scale-105 hover:z-10 cursor-pointer">
+              <div
+                key={movie.id}
+                className="transition-transform duration-300 hover:scale-105 hover:z-10 cursor-pointer"
+              >
                 <MovieCard movie={movie} />
               </div>
             ))}
@@ -203,7 +227,10 @@ export default function MediaPage() {
           <div className="flex flex-col items-center justify-center py-32 text-center">
             <SearchIcon className="w-16 h-16 text-gray-600 mb-4" />
             <h3 className="text-2xl font-semibold mb-2">No matches found</h3>
-            <p className="text-muted-foreground max-w-md">We couldn't find anything matching your filters. Try adjusting your search or clearing the filters.</p>
+            <p className="text-muted-foreground max-w-md">
+              We couldn't find anything matching your filters. Try adjusting
+              your search or clearing the filters.
+            </p>
           </div>
         )}
 
@@ -217,14 +244,16 @@ export default function MediaPage() {
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
-            
+
             <div className="flex gap-2">
               {[...Array(meta.totalPages)].map((_, i) => (
                 <button
                   key={i}
                   onClick={() => handleFilterChange("page", i + 1)}
                   className={`w-3 h-3 rounded-full transition-all ${
-                    meta.page === i + 1 ? "bg-red-600 scale-125" : "bg-gray-600 hover:bg-gray-400"
+                    meta.page === i + 1
+                      ? "bg-red-600 scale-125"
+                      : "bg-gray-600 hover:bg-gray-400"
                   }`}
                   aria-label={`Go to page ${i + 1}`}
                 />

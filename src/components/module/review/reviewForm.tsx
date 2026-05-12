@@ -154,7 +154,7 @@ export default function CreateReviewForm({ movieId }: { movieId: string }) {
           </button>
 
           {isDropdownOpen && (
-            <div className="absolute z-50 w-full mt-2 bg-[#1a1a1a] border border-border rounded-md shadow-2xl max-h-60 overflow-y-auto">
+            <div className="absolute z-50 w-full mt-2 bg-background border border-border rounded-md shadow-2xl max-h-60 overflow-y-auto">
               {isLoadingTags ? (
                 <div className="p-4 text-center text-gray-500 text-sm">Loading tags...</div>
               ) : (
