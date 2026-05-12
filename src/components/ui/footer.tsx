@@ -62,25 +62,25 @@ export function Footer() {
             </p>
             <div className="flex items-center space-x-4 pt-2">
               <Link
-                href="#"
+                href="https://www.facebook.com/"
                 className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
               >
                 <FacebookIcon className="h-5 w-5" />
               </Link>
               <Link
-                href="#"
+                href="https://x.com/"
                 className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
               >
                 <TwitterIcon className="h-5 w-5" />
               </Link>
               <Link
-                href="#"
+                href="https://www.instagram.com/"
                 className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
               >
                 <InstagramIcon className="h-5 w-5" />
               </Link>
               <Link
-                href="#"
+                href="https://www.youtube.com/"
                 className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
               >
                 <YoutubeIcon className="h-5 w-5" />
@@ -117,15 +117,6 @@ export function Footer() {
                 >
                   <span className="h-1 w-1 rounded-full bg-primary mr-2 opacity-0 -ml-3 transition-all"></span>
                   TV Shows
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/trending"
-                  className="text-muted-foreground hover:text-primary transition-colors text-sm flex items-center"
-                >
-                  <span className="h-1 w-1 rounded-full bg-primary mr-2 opacity-0 -ml-3 transition-all"></span>
-                  Trending Now
                 </Link>
               </li>
               <li>
@@ -184,7 +175,7 @@ export function Footer() {
           </div>
 
           {/* Newsletter */}
-          <div className="lg:col-span-1">
+          {/* <div className="lg:col-span-1">
             <h3 className="text-lg font-semibold mb-6">Stay Updated</h3>
             <p className="text-muted-foreground text-sm mb-4">
               Subscribe to our newsletter to get the latest updates on new
@@ -212,7 +203,7 @@ export function Footer() {
                 Subscribe
               </Button>
             </form>
-          </div>
+          </div> */}
         </div>
 
         {/* Bottom Bar */}
