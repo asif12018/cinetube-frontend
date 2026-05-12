@@ -37,7 +37,7 @@ export function MovieRow({ title, movies }: MovieRowProps) {
         {/* Section heading */}
         <div className="flex items-center gap-3 mb-4 md:mb-6">
           <div className="w-[3px] h-5 md:h-7 bg-red-600 rounded-full" />
-          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white tracking-wide">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground tracking-wide">
             {title}
           </h2>
         </div>
