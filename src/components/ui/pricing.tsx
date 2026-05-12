@@ -93,6 +93,9 @@ export function Pricing() {
               </ul>
 
               <Button
+                onClick={() => {
+                   window.location.href = '/login'; 
+                }}
                 className={`w-full py-6 text-base font-bold ${
                   plan.popular
                     ? "bg-red-600 hover:bg-red-700 text-white"
