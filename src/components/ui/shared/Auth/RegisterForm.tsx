@@ -345,7 +345,7 @@ const RegisterForm = ({ redirectPath }: RegisterFormProps) => {
             variant="outline"
             className="w-full h-[48px] bg-transparent border-[#737373] text-foreground hover:bg-white/10 font-medium flex items-center justify-center gap-3"
             onClick={() => {
-              window.location.href = `${process.env.NEXT_PUBLIC_API_BASE_URL || "https://cinehub-backend-z65f.onrender.com/api/v1"}/auth/login/google`;
+              window.location.href = `${process.env.NEXT_PUBLIC_API_BASE_URL || "https://cinetube-backend-beta.vercel.app/api/v1"}/auth/login/google`;
             }}
           >
             <svg viewBox="0 0 24 24" className="w-5 h-5" aria-hidden="true">

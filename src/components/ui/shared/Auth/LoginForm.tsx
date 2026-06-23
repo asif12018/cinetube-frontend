@@ -341,7 +341,7 @@ const LoginForm = ({ redirectPath }: LoginFormProps) => {
   className="w-full h-[48px] bg-transparent border-[#737373] text-foreground hover:bg-white/10 font-medium flex items-center justify-center gap-3"
   onClick={() => {
     // Redirect directly to the custom backend Google login endpoint
-    window.location.href = `${process.env.NEXT_PUBLIC_API_BASE_URL || "https://cinehub-backend-z65f.onrender.com/api/v1"}/auth/login/google`;
+    window.location.href = `${process.env.NEXT_PUBLIC_API_BASE_URL || "https://cinetube-backend-beta.vercel.app/api/v1"}/auth/login/google`;
   }}
           >
             {/* Putting the Icon and Text back inside the button! */}

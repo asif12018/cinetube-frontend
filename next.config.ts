@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/v1/:path*',
-        destination: 'https://cinehub-backend-z65f.onrender.com/api/v1/:path*',
+        destination: 'https://cinetube-backend-beta.vercel.app/api/v1/:path*',
       },
     ]
   },
