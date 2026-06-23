@@ -285,57 +285,9 @@ const LoginForm = ({ redirectPath }: LoginFormProps) => {
             </svg>
             Sign in with Google
           </Button> */}
+          {/*
           <Button
-            // type="button"
-            // variant="outline"
-            // className="w-full h-[48px] bg-transparent border-[#737373] text-foreground hover:bg-white/10 font-medium flex items-center justify-center gap-3"
-            // onClick={async (e) => {
-            //   e.preventDefault();
-
-            //   // 1. Open an empty popup IMMEDIATELY to bypass the browser's popup blocker
-            //   const width = 500;
-            //   const height = 600;
-            //   const left = window.screenX + (window.outerWidth - width) / 2;
-            //   const top = window.screenY + (window.outerHeight - height) / 2;
-            //   const popup = window.open(
-            //     "", // Start empty
-            //     "GoogleLoginPopup",
-            //     `width=${width},height=${height},left=${left},top=${top},popup=yes`
-            //   );
-
-            //   try {
-            //     const backendUrl =
-            //       process.env.NEXT_PUBLIC_API_BASE_URL?.replace("/api/v1", "") || 
-            //       "https://cinehub-backend-z65f.onrender.com";
-
-            //     // 2. Fetch directly from your live Render backend
-            //     const response = await fetch(
-            //       `${backendUrl}/api/v1/auth/sign-in/social`,
-            //       {
-            //         method: "POST",
-            //         headers: { "Content-Type": "application/json" },
-            //         credentials: "include", // Saves the cross-domain cookie
-            //         body: JSON.stringify({
-            //           provider: "google",
-            //           callbackURL: "http://localhost:3000",
-            //         }),
-            //       }
-            //     );
-
-            //     const data = await response.json();
-
-            //     // 3. Send the popup window to the Google URL
-            //     if (data?.url && popup) {
-            //       popup.location.href = data.url;
-            //     } else {
-            //       console.error("Google start failed:", data);
-            //       if (popup) popup.close(); // Close the blank popup if it failed
-            //     }
-            //   } catch (error) {
-            //     console.error("Fetch error:", error);
-            //     if (popup) popup.close(); // Close the blank popup if it failed
-            //   }
-            // }}
+           
              type="button"
   variant="outline"
   className="w-full h-[48px] bg-transparent border-[#737373] text-foreground hover:bg-white/10 font-medium flex items-center justify-center gap-3"
@@ -344,7 +296,7 @@ const LoginForm = ({ redirectPath }: LoginFormProps) => {
     window.location.href = `${process.env.NEXT_PUBLIC_API_BASE_URL || "https://cinetube-backend-beta.vercel.app/api/v1"}/auth/login/google`;
   }}
           >
-            {/* Putting the Icon and Text back inside the button! */}
+            
             <svg viewBox="0 0 24 24" className="w-5 h-5" aria-hidden="true">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
               <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
@@ -353,6 +305,7 @@ const LoginForm = ({ redirectPath }: LoginFormProps) => {
             </svg>
             Sign in with Google
           </Button>
+         */}
         </div>
       </CardContent>
 
